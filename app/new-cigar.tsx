@@ -1,6 +1,7 @@
 import { ScrollView, Text, View, TouchableOpacity, TextInput, Alert } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { PhotoPicker } from "@/components/photo-picker";
 import { useColors } from "@/hooks/use-colors";
 import { useData } from "@/lib/context/data-context";
 import { useRouter } from "expo-router";
@@ -48,6 +49,7 @@ export default function NewCigarScreen() {
   const [purchasePrice, setPurchasePrice] = useState("");
   const [purchaseLocation, setPurchaseLocation] = useState("");
   const [humidorId, setHumidorId] = useState(humidors[0]?.id || "");
+  const [photoUri, setPhotoUri] = useState("");
 
   const handleSave = async () => {
     if (!brand || !name || !ringGauge || !length || !purchasePrice || !humidorId) {
@@ -69,6 +71,7 @@ export default function NewCigarScreen() {
         purchasePrice: parseFloat(purchasePrice),
         purchaseLocation,
         humidorId,
+        photoUri: photoUri || undefined,
       });
 
       Alert.alert("Sucesso", "Charuto adicionado com sucesso!");
@@ -350,6 +353,13 @@ export default function NewCigarScreen() {
               </ScrollView>
             </View>
           </View>
+
+          {/* Foto do Charuto */}
+          <PhotoPicker
+            onPhotoSelected={setPhotoUri}
+            photoUri={photoUri}
+            label="Foto do Charuto"
+          />
 
           {/* Action Buttons */}
           <View className="flex-row gap-3 mt-4">

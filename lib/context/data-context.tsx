@@ -49,6 +49,23 @@ export interface Review {
   createdAt: string;
 }
 
+export interface GlobalCigar {
+  id: string;
+  brand: string;
+  name: string;
+  vitola: string;
+  ringGauge: number;
+  length: number;
+  country: string;
+  wrapper?: string;
+  binder?: string;
+  filler?: string;
+  source: "charutos.com" | "cigar-aficionado" | "cigar-geeks" | "other";
+  sourceUrl?: string;
+  averageRating?: number;
+  reviewCount?: number;
+}
+
 interface DataContextType {
   humidors: Humidor[];
   cigars: Cigar[];

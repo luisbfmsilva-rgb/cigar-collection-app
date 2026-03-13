@@ -1,6 +1,7 @@
 import { ScrollView, Text, View, TouchableOpacity, TextInput, Alert } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { PhotoPicker } from "@/components/photo-picker";
 import { useColors } from "@/hooks/use-colors";
 import { StarRating } from "@/components/star-rating";
 import { TagSelector } from "@/components/tag-selector";
@@ -62,6 +63,7 @@ export default function NewReviewScreen() {
   const [comments, setComments] = useState("");
   const [tastingDate, setTastingDate] = useState(new Date().toISOString().split("T")[0]);
   const [smokingTime, setSmokingTime] = useState("");
+  const [photoUri, setPhotoUri] = useState("");
 
   const cigar = cigars.find((c) => c.id === cigarId);
 
@@ -89,6 +91,7 @@ export default function NewReviewScreen() {
         intensity,
         comments,
         smokingTime: smokingTime ? parseInt(smokingTime) : undefined,
+        photoUri: photoUri || undefined,
       });
 
       Alert.alert("Sucesso", "Review salvo com sucesso!");
@@ -249,6 +252,13 @@ export default function NewReviewScreen() {
               </Text>
             </View>
           )}
+
+          {/* Foto do Review */}
+          <PhotoPicker
+            onPhotoSelected={setPhotoUri}
+            photoUri={photoUri}
+            label="Foto do Charuto Fumado"
+          />
 
           {/* Action Buttons */}
           <View className="flex-row gap-3">

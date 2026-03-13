@@ -71,3 +71,24 @@
 - [ ] Adicionar dark mode
 - [ ] Melhorar acessibilidade
 - [ ] Criar ícones customizados
+
+## Fase 7: Câmera e Galeria
+- [x] Integrar expo-image-picker
+- [x] Adicionar campo de foto no formulário de novo charuto
+- [x] Adicionar campo de foto no formulário de novo review
+- [ ] Exibir fotos na tela de detalhes do charuto
+- [ ] Exibir fotos na tela de detalhes do review
+
+## Fase 8: Base de Dados Global de Charutos
+- [x] Criar tela Explorar com busca de charutos
+- [x] Integrar dados de Charutos.com (via web scraping ou API)
+- [x] Integrar dados de Cigar Aficionado
+- [x] Implementar busca por marca, vitola, país
+- [x] Adicionar charutos da base global ao inventário pessoal
+
+## Fase 9: Exportação de Relatórios
+- [x] Integrar expo-document-picker e react-native-pdf-lib
+- [x] Criar função de geração de PDF com resumo da coleção
+- [x] Incluir estatísticas de reviews no PDF
+- [x] Implementar compartilhamento de relatório
+- [ ] Adicionar opção de exportar por período

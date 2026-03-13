@@ -158,6 +158,27 @@ export default function HomeScreen() {
             )}
           </View>
 
+          {/* Export Button */}
+          <TouchableOpacity
+            onPress={() => router.push("/export-report")}
+            className="bg-primary rounded-xl p-4 flex-row items-center justify-between active:opacity-80"
+            activeOpacity={0.8}
+          >
+            <View className="gap-1">
+              <Text className="text-sm font-semibold text-white">
+                Exportar Relatório
+              </Text>
+              <Text className="text-xs text-white/80">
+                Gere um PDF da sua coleção
+              </Text>
+            </View>
+            <IconSymbol
+              name="doc.fill"
+              size={24}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+
           {/* Recent Reviews Section */}
           <View className="gap-3">
             <Text className="text-lg font-semibold text-foreground">
