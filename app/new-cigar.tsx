@@ -2,10 +2,12 @@ import { ScrollView, Text, View, TouchableOpacity, TextInput, Alert } from "reac
 import { ScreenContainer } from "@/components/screen-container";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { PhotoPicker } from "@/components/photo-picker";
+import { AutocompleteInput } from "@/components/autocomplete-input";
 import { useColors } from "@/hooks/use-colors";
 import { useData } from "@/lib/context/data-context";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { getBrands, getCigarNamesByBrand, searchCigar } from "@/lib/global-cigars-db";
 
 const VITOLAS = [
   "Robusto",
@@ -39,6 +41,32 @@ export default function NewCigarScreen() {
 
   const [brand, setBrand] = useState("");
   const [name, setName] = useState("");
+  
+  // Sugestões de autocompletar
+  const brandSuggestions = useMemo(() => getBrands(), []);
+  const nameSuggestions = useMemo(
+    () => (brand ? getCigarNamesByBrand(brand) : []),
+    [brand]
+  );
+  
+  // Buscar dados do charuto global quando marca e nome são selecionados
+  const handleBrandSelect = (selectedBrand: string) => {
+    setBrand(selectedBrand);
+    setName(""); // Resetar nome quando marca muda
+  };
+  
+  const handleNameSelect = (selectedName: string) => {
+    setName(selectedName);
+    // Buscar dados do charuto global e preencher campos
+    const globalCigar = searchCigar(brand, selectedName);
+    if (globalCigar) {
+      setVitola(globalCigar.vitola);
+      setRingGauge(globalCigar.ringGauge.toString());
+      setLength(globalCigar.length.toString());
+      setCountry(globalCigar.country);
+      setWrapper(globalCigar.wrapper);
+    }
+  };
   const [vitola, setVitola] = useState("Robusto");
   const [ringGauge, setRingGauge] = useState("");
   const [length, setLength] = useState("");
@@ -132,30 +160,26 @@ export default function NewCigarScreen() {
           </View>
 
           {/* Marca */}
-          <View className="gap-2">
-            <Text className="text-sm font-medium text-foreground">
-              Marca *
-            </Text>
-            <TextInput
-              value={brand}
-              onChangeText={setBrand}
-              placeholder="Ex: Cohiba"
-              className="bg-surface border border-border rounded-lg px-3 py-2 text-foreground"
-            />
-          </View>
+          <AutocompleteInput
+            label="Marca"
+            placeholder="Comece a digitar (Ex: Cohiba)"
+            value={brand}
+            onChangeText={setBrand}
+            suggestions={brandSuggestions}
+            onSelectSuggestion={handleBrandSelect}
+            required
+          />
 
           {/* Nome/Linha */}
-          <View className="gap-2">
-            <Text className="text-sm font-medium text-foreground">
-              Nome/Linha *
-            </Text>
-            <TextInput
-              value={name}
-              onChangeText={setName}
-              placeholder="Ex: Robusto"
-              className="bg-surface border border-border rounded-lg px-3 py-2 text-foreground"
-            />
-          </View>
+          <AutocompleteInput
+            label="Nome/Linha"
+            placeholder="Comece a digitar (Ex: Robusto)"
+            value={name}
+            onChangeText={setName}
+            suggestions={nameSuggestions}
+            onSelectSuggestion={handleNameSelect}
+            required
+          />
 
           {/* Vitola */}
           <View className="gap-2">

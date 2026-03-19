@@ -92,3 +92,9 @@
 - [x] Incluir estatísticas de reviews no PDF
 - [x] Implementar compartilhamento de relatório
 - [ ] Adicionar opção de exportar por período
+
+## Fase 10: Correções e Melhorias
+- [x] Revisar e corrigir componente PhotoPicker
+- [x] Implementar autocompletar para marca de charuto
+- [x] Implementar autocompletar para nome de charuto
+- [x] Testar funcionalidade de foto em novo charuto
