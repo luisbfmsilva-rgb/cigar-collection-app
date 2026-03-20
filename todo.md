@@ -125,3 +125,24 @@
 - [x] Aplicar ícone em app.config.ts
 - [x] Gerar variações para iOS e Android
 - [x] Testar ícone em diferentes resoluções
+
+## Fase 15: Integração de API Real
+- [x] Integrar API de Charutos.com via web scraping
+- [x] Integrar API de Cigar Aficionado
+- [x] Implementar sincronização automática semanal
+- [x] Adicionar cache local para performance
+- [x] Implementar tratamento de erros de API
+
+## Fase 16: Estatísticas Avançadas
+- [x] Criar gráfico de evolução de notas ao longo do tempo
+- [x] Implementar distribuição de sabores preferidos
+- [x] Adicionar análise de tendências de fumadas por mês/ano
+- [x] Criar tela de Analytics com múltiplos gráficos
+- [x] Implementar filtros de período nos gráficos
+
+## Fase 17: Notificações Push
+- [x] Integrar expo-notifications
+- [x] Implementar lembretes para charutos antigos
+- [x] Adicionar sugestões personalizadas
+- [x] Criar centro de notificações
+- [x] Implementar configurações de notificações
