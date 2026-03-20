@@ -32,7 +32,7 @@ const env = {
   appSlug: "cigar-collection-app",
   // S3 URL of the app logo - set this to the URL returned by generate_image when creating custom logo
   // Leave empty to use the default icon from assets/images/icon.png
-  logoUrl: "",
+  logoUrl: "https://d2xsxph8kpxj0f.cloudfront.net/310419663028261330/FYdTVkpuwZ2WZiSE9vgcxF/icon-Lcb6QTWYZsoVt3ue2yi8Jg.webp",
   scheme: schemeFromBundleId,
   iosBundleId: bundleId,
   androidPackage: bundleId,
@@ -56,10 +56,10 @@ const config: ExpoConfig = {
   },
   android: {
     adaptiveIcon: {
-      backgroundColor: "#E6F4FE",
+      backgroundColor: "#D4A574",
       foregroundImage: "./assets/images/android-icon-foreground.png",
       backgroundImage: "./assets/images/android-icon-background.png",
-      monochromeImage: "./assets/images/android-icon-monochrome.png",
+      monochromeImage: "./assets/images/android-icon-foreground.png",
     },
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,

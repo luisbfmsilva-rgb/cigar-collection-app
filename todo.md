@@ -98,3 +98,30 @@
 - [x] Implementar autocompletar para marca de charuto
 - [x] Implementar autocompletar para nome de charuto
 - [x] Testar funcionalidade de foto em novo charuto
+
+## Fase 11: Expansão da Base de Dados Global
+- [x] Expandir base de dados com 100+ charutos adicionais
+- [x] Adicionar charutos de mais marcas (Montecristo, Davidoff, Padron, etc.)
+- [x] Integrar dados de Charutos.com via web scraping
+- [x] Integrar dados de Cigar Aficionado
+- [x] Integrar dados de Cigar Geeks
+
+## Fase 12: Galeria de Fotos com Swipe
+- [x] Criar componente PhotoGallery com swipe
+- [x] Implementar visualização de múltiplas fotos em charutos
+- [x] Implementar visualização de múltiplas fotos em reviews
+- [x] Adicionar indicador de página na galeria
+- [x] Adicionar botão de deletar foto individual
+
+## Fase 13: Sincronização com Nuvem
+- [x] Implementar autenticação com OAuth
+- [x] Criar sincronização de dados com servidor
+- [ ] Implementar backup automático
+- [ ] Adicionar opção de restaurar dados
+- [ ] Implementar sincronização em tempo real
+
+## Fase 14: Ícone Profissional
+- [x] Gerar ícone profissional para o app
+- [x] Aplicar ícone em app.config.ts
+- [x] Gerar variações para iOS e Android
+- [x] Testar ícone em diferentes resoluções
