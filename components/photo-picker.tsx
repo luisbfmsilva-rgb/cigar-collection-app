@@ -113,14 +113,14 @@ export function PhotoPicker({
             className="absolute top-2 right-2 bg-error rounded-full p-2 active:opacity-80"
             activeOpacity={0.8}
           >
-            <IconSymbol name="xmark" size={16} color="#FFFFFF" />
+            <Text className="text-white font-bold">✕</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={handlePickImage}
             className="absolute bottom-2 right-2 bg-primary rounded-full p-2 active:opacity-80"
             activeOpacity={0.8}
           >
-            <IconSymbol name="pencil" size={16} color="#FFFFFF" />
+            <Text className="text-white font-bold">✎</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -143,11 +143,7 @@ export function PhotoPicker({
             <ActivityIndicator color={colors.primary} size="small" />
           ) : (
             <>
-              <IconSymbol
-                name="photo.fill"
-                size={24}
-                color={colors.primary}
-              />
+              <Text style={{ fontSize: 24 }}>🖼️</Text>
               <Text className="text-sm font-medium text-foreground">
                 Galeria
               </Text>
@@ -167,11 +163,7 @@ export function PhotoPicker({
             <ActivityIndicator color={colors.primary} size="small" />
           ) : (
             <>
-              <IconSymbol
-                name="camera.fill"
-                size={24}
-                color={colors.primary}
-              />
+              <Text style={{ fontSize: 24 }}>📷</Text>
               <Text className="text-sm font-medium text-foreground">
                 Câmera
               </Text>

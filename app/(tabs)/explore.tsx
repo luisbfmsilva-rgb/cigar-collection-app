@@ -1,117 +1,10 @@
-import { ScrollView, Text, View, TouchableOpacity, TextInput, FlatList, Alert } from "react-native";
+import { Alert, FlatList, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { useData } from "@/lib/context/data-context";
+import { COMPLETE_CIGARS_DATABASE } from "@/lib/cigars-database-complete";
 import { useState, useMemo } from "react";
-
-// Base de dados global de charutos (exemplo com dados reais)
-const GLOBAL_CIGARS = [
-  {
-    id: "cohiba-robusto",
-    brand: "Cohiba",
-    name: "Robusto",
-    vitola: "Robusto",
-    ringGauge: 50,
-    length: 124,
-    country: "Cuba",
-    wrapper: "Habano",
-    source: "charutos.com" as const,
-    averageRating: 92,
-    reviewCount: 1250,
-  },
-  {
-    id: "davidoff-millennium",
-    brand: "Davidoff",
-    name: "Millennium Robusto",
-    vitola: "Robusto",
-    ringGauge: 50,
-    length: 124,
-    country: "República Dominicana",
-    wrapper: "Olor",
-    source: "cigar-aficionado" as const,
-    averageRating: 88,
-    reviewCount: 890,
-  },
-  {
-    id: "montecristo-no2",
-    brand: "Montecristo",
-    name: "No. 2",
-    vitola: "Torpedo",
-    ringGauge: 52,
-    length: 156,
-    country: "Cuba",
-    wrapper: "Habano",
-    source: "charutos.com" as const,
-    averageRating: 94,
-    reviewCount: 2100,
-  },
-  {
-    id: "padron-1964",
-    brand: "Padron",
-    name: "1964 Anniversary Maduro",
-    vitola: "Robusto",
-    ringGauge: 50,
-    length: 124,
-    country: "Nicarágua",
-    wrapper: "Maduro",
-    source: "cigar-aficionado" as const,
-    averageRating: 91,
-    reviewCount: 1560,
-  },
-  {
-    id: "arturo-fuente-opus",
-    brand: "Arturo Fuente",
-    name: "Opus X",
-    vitola: "Robusto",
-    ringGauge: 50,
-    length: 124,
-    country: "República Dominicana",
-    wrapper: "Fuente",
-    source: "cigar-geeks" as const,
-    averageRating: 90,
-    reviewCount: 1200,
-  },
-  {
-    id: "partagas-serie-d",
-    brand: "Partagás",
-    name: "Serie D No. 4",
-    vitola: "Robusto",
-    ringGauge: 50,
-    length: 124,
-    country: "Cuba",
-    wrapper: "Habano",
-    source: "charutos.com" as const,
-    averageRating: 89,
-    reviewCount: 980,
-  },
-  {
-    id: "oliva-v-melanio",
-    brand: "Oliva",
-    name: "V Melanio",
-    vitola: "Robusto",
-    ringGauge: 50,
-    length: 124,
-    country: "Nicarágua",
-    wrapper: "Sumatra",
-    source: "cigar-aficionado" as const,
-    averageRating: 87,
-    reviewCount: 650,
-  },
-  {
-    id: "ramon-allones-specially",
-    brand: "Ramón Allones",
-    name: "Specially Selected",
-    vitola: "Robusto",
-    ringGauge: 50,
-    length: 124,
-    country: "Cuba",
-    wrapper: "Habano",
-    source: "charutos.com" as const,
-    averageRating: 88,
-    reviewCount: 720,
-  },
-];
 
 export default function ExploreScreen() {
   const colors = useColors();
@@ -120,7 +13,7 @@ export default function ExploreScreen() {
   const [filterSource, setFilterSource] = useState<string | null>(null);
 
   const filteredCigars = useMemo(() => {
-    return GLOBAL_CIGARS.filter((c) => {
+    return COMPLETE_CIGARS_DATABASE.filter((c) => {
       const matchesSearch =
         c.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -136,7 +29,7 @@ export default function ExploreScreen() {
     return cigars.some((c) => c.id === globalCigarId);
   };
 
-  const handleAddCigar = async (globalCigar: (typeof GLOBAL_CIGARS)[0]) => {
+  const handleAddCigar = async (globalCigar: (typeof COMPLETE_CIGARS_DATABASE)[0]) => {
     if (!humidors.length) {
       Alert.alert(
         "Sem Umidores",
@@ -171,24 +64,21 @@ export default function ExploreScreen() {
 
   return (
     <ScreenContainer className="p-4">
-      <View className="flex-1 gap-4">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View className="gap-4">
         {/* Header */}
         <View className="gap-1">
           <Text className="text-3xl font-bold text-foreground">
             Explorar
           </Text>
           <Text className="text-sm text-muted">
-            Descubra novos charutos
+            Descubra {COMPLETE_CIGARS_DATABASE.length}+ charutos
           </Text>
         </View>
 
         {/* Search Bar */}
         <View className="flex-row items-center gap-2 bg-surface border border-border rounded-xl px-3 py-2">
-          <IconSymbol
-            name="magnifyingglass"
-            size={20}
-            color={colors.muted}
-          />
+          <Text style={{ fontSize: 18 }}>🔍</Text>
           <TextInput
             placeholder="Buscar charuto..."
             placeholderTextColor={colors.muted}
@@ -257,11 +147,7 @@ export default function ExploreScreen() {
               className="w-16 h-16 rounded-full items-center justify-center"
               style={{ backgroundColor: colors.primary + "20" }}
             >
-              <IconSymbol
-                name="magnifyingglass"
-                size={32}
-                color={colors.primary}
-              />
+              <Text style={{ fontSize: 32 }}>🔍</Text>
             </View>
             <View className="items-center gap-2">
               <Text className="text-lg font-semibold text-foreground">
@@ -276,7 +162,8 @@ export default function ExploreScreen() {
           <FlatList
             data={filteredCigars}
             keyExtractor={(item) => item.id}
-            scrollEnabled={false}
+            scrollEnabled={true}
+            nestedScrollEnabled={true}
             contentContainerStyle={{ gap: 12 }}
             renderItem={({ item }) => {
               const alreadyAdded = isAlreadyAdded(item.id);
@@ -341,11 +228,7 @@ export default function ExploreScreen() {
 
                     {/* Source Badge */}
                     <View className="flex-row items-center gap-2">
-                      <IconSymbol
-                        name="globe"
-                        size={14}
-                        color={colors.muted}
-                      />
+                      <Text style={{ fontSize: 14 }}>🌐</Text>
                       <Text className="text-xs text-muted">
                         {item.source === "charutos.com"
                           ? "Charutos.com"
@@ -367,11 +250,9 @@ export default function ExploreScreen() {
                       activeOpacity={0.8}
                     >
                       <View className="flex-row items-center gap-2">
-                        <IconSymbol
-                          name={alreadyAdded ? "checkmark.circle.fill" : "plus.circle.fill"}
-                          size={16}
-                          color={alreadyAdded ? colors.muted : "#FFFFFF"}
-                        />
+                        <Text style={{ fontSize: 16 }}>
+                          {alreadyAdded ? "✓" : "+"}
+                        </Text>
                         <Text
                           className={`font-medium text-sm ${
                             alreadyAdded
@@ -389,7 +270,8 @@ export default function ExploreScreen() {
             }}
           />
         )}
-      </View>
+        </View>
+      </ScrollView>
     </ScreenContainer>
   );
 }

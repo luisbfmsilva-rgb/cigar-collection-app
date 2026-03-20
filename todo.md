@@ -146,3 +146,58 @@
 - [x] Adicionar sugestões personalizadas
 - [x] Criar centro de notificações
 - [x] Implementar configurações de notificações
+
+
+## Fase 18: Correção de Bugs
+- [x] Corrigir erro de seleção de foto (PhotoPicker)
+- [x] Corrigir scroll na tela Explorar
+- [x] Testar funcionalidade de câmera
+
+## Fase 19: Web Scraping de Charutos
+- [ ] Fazer web scraping de Charutos.com
+- [ ] Fazer web scraping de Cigar Aficionado
+- [ ] Fazer web scraping de Cigar Geeks
+- [ ] Fazer web scraping de outros sites de charutos
+- [ ] Consolidar dados em um único banco de dados
+- [ ] Adicionar 500+ charutos à base de dados
+
+## Fase 20: Integração Supabase
+- [ ] Configurar projeto Supabase
+- [ ] Criar tabelas no Supabase (users, cigars, humidors, reviews, etc.)
+- [ ] Integrar Supabase no app
+- [ ] Migrar dados locais para Supabase
+
+## Fase 21: Autenticação de Usuários
+- [ ] Implementar cadastro de usuários
+- [ ] Implementar login de usuários
+- [ ] Implementar logout
+- [ ] Implementar recuperação de senha
+- [ ] Integrar com OAuth (Google, Apple)
+
+## Fase 22: Perfil de Usuário
+- [ ] Criar tela de perfil
+- [ ] Adicionar campos: nome, email, idade, cidade, foto
+- [ ] Adicionar campos: marcas favoritas, gostos, bio
+- [ ] Implementar edição de perfil
+- [ ] Implementar upload de foto de perfil
+
+## Fase 23: Reviews Públicos/Privados
+- [ ] Adicionar campo de privacidade nos reviews
+- [ ] Implementar controle de visibilidade
+- [ ] Mostrar apenas reviews públicos no feed
+- [ ] Permitir usuário escolher privacidade ao criar review
+
+## Fase 24: Feed Social
+- [ ] Criar tela de feed
+- [ ] Implementar posts de usuários
+- [ ] Implementar sistema de likes
+- [ ] Implementar sistema de comentários
+- [ ] Implementar sistema de compartilhamento
+- [ ] Implementar notificações de interações
+
+## Fase 25: Confrarias Virtuais
+- [ ] Criar tela de confrarias
+- [ ] Implementar criação de confrarias
+- [ ] Implementar convite de membros
+- [ ] Implementar feed privado de confrarias
+- [ ] Implementar moderação de confrarias
