@@ -25,6 +25,9 @@ const MAPPING = {
   "camera.fill": "photo-camera",
   "checkmark.circle.fill": "check-circle",
   "chevron.right": "chevron-right",
+  "person.fill": "person",
+  "archivebox.fill": "archive",
+  "square.grid.2x2.fill": "grid",
 } satisfies Record<string, string>;
 
 /**
