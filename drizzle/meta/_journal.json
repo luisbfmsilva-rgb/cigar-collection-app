@@ -15,6 +15,13 @@
       "when": 1774024160486,
       "tag": "0001_massive_plazm",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1774092679351,
+      "tag": "0002_lowly_hulk",
+      "breakpoints": true
     }
   ]
 }
