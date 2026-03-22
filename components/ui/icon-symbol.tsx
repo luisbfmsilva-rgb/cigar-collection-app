@@ -26,8 +26,10 @@ const MAPPING = {
   "checkmark.circle.fill": "check-circle",
   "chevron.right": "chevron-right",
   "person.fill": "person",
+  "person.3.fill": "people",
   "archivebox.fill": "archive",
   "square.grid.2x2.fill": "grid",
+  "heart.fill": "favorite",
 } satisfies Record<string, string>;
 
 /**
