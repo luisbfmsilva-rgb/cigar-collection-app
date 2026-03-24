@@ -1,3 +1,11 @@
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
@@ -23,35 +31,19 @@ jobs:
       - name: Install Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
 
-      - name: Install expect
-        run: sudo apt-get update && sudo apt-get install -y expect
+      - name: Configure Bubblewrap environment
+        run: |
+          mkdir -p "$HOME/.bubblewrap"
+          cat > "$HOME/.bubblewrap/config.json" <<EOF
+          {"jdkPath":"$JAVA_HOME","androidSdkPath":"$ANDROID_SDK_ROOT"}
+          EOF
+        env:
+          BUBBLEWRAP_SKIP_UPDATE_CHECK: true
 
       - name: Initialize Bubblewrap project
         run: |
           mkdir apk-build && cd apk-build
-          expect <<'EOF'
-          log_user 1
-          spawn bubblewrap init --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json --directory .
-          expect {
-            -re {Do you want Bubblewrap to install the JDK.*} {
-              send "n\r"
-              exp_continue
-            }
-            -re {Path to your existing JDK:} {
-              send "$env(JAVA_HOME)\r"
-              exp_continue
-            }
-            -re {Do you want Bubblewrap to install the Android SDK.*} {
-              send "n\r"
-              exp_continue
-            }
-            -re {Path to your existing Android SDK:} {
-              send "$env(ANDROID_SDK_ROOT)\r"
-              exp_continue
-            }
-            eof
-          }
-          EOF
+          bubblewrap init --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json --directory .
         env:
           BUBBLEWRAP_SKIP_UPDATE_CHECK: true
 
@@ -64,6 +56,10 @@ jobs:
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
+        with:
+          name: cigar-club-apk
+          path: apk-build/*.apk
+          retention-days: 30
         with:
           name: cigar-club-apk
           path: apk-build/*.apk
