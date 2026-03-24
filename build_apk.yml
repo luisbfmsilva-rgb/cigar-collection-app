@@ -1,12 +1,15 @@
-name: Build APK (PWA → Android) CI
+ame: Android APK (Expo prebuild)
 
 on:
   push:
     branches: [main, master]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  build-apk:
+  build-debug-apk:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,50 +20,36 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'pnpm'
 
-      - name: Setup Java
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Bubblewrap CLI
-        run: npm install -g @bubblewrap/cli
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Configure Bubblewrap paths
-        run: |
-          mkdir -p "$HOME/.bubblewrap" "$HOME/.config/bubblewrap"
-          cat > "$HOME/.bubblewrap/config.json" <<EOF
-          {"jdkPath":"$JAVA_HOME","androidSdkPath":"$ANDROID_SDK_ROOT"}
-          EOF
-          cat > "$HOME/.config/bubblewrap/config.json" <<EOF
-          {"jdkPath":"$JAVA_HOME","androidSdkPath":"$ANDROID_SDK_ROOT"}
-          EOF
-        env:
-          BUBBLEWRAP_SKIP_UPDATE_CHECK: true
+      - name: Generate native Android project
+        run: npx expo prebuild --platform android --non-interactive
 
-      - name: Initialize Bubblewrap project
+      - name: Build debug APK
         run: |
-          mkdir -p apk-build && cd apk-build
-          CI=true bubblewrap init --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json --directory .
-        env:
-          CI: true
-          BUBBLEWRAP_SKIP_UPDATE_CHECK: true
-
-      - name: Build APK
-        run: |
-          cd apk-build
-          CI=true bubblewrap build --skipPwaValidation
-        env:
-          CI: true
-          BUBBLEWRAP_SKIP_UPDATE_CHECK: true
+          cd android
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cigar-club-apk
-          path: apk-build/*.apk
+          name: cigar-collection-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
           retention-days: 30
