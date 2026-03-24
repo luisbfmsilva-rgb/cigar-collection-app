@@ -29,7 +29,6 @@ jobs:
       - name: Initialize Bubblewrap project
         run: |
           mkdir apk-build && cd apk-build
-          bubblewrap init --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json --directory .
           expect <<'EOF'
           log_user 1
           spawn bubblewrap init --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json --directory .
