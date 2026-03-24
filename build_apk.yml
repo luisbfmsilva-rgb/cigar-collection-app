@@ -33,21 +33,19 @@ jobs:
       - name: Install Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
 
-      - name: Initialize Bubblewrap project (non-interactive)
+      - name: Initialize Bubblewrap project
         run: |
           mkdir apk-build && cd apk-build
-          bubblewrap init \
+          printf "n\n" | bubblewrap init \
             --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json \
-            --directory . \
-            --jdkPath $(dirname $(dirname $(readlink -f $(which java)))) \
-            --androidSdkPath $ANDROID_SDK_ROOT
+            --directory .
         env:
           BUBBLEWRAP_SKIP_UPDATE_CHECK: "true"
 
-      - name: Build APK (non-interactive)
+      - name: Build APK
         run: |
           cd apk-build
-          bubblewrap build --skipPwaValidation
+          printf "\n" | bubblewrap build --skipPwaValidation
         env:
           BUBBLEWRAP_SKIP_UPDATE_CHECK: "true"
 
