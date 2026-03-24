@@ -30,9 +30,7 @@ jobs:
       - name: Install Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
 
-      - name: Install expect
-        run: sudo apt-get update && sudo apt-get install -y expect
-
+      - name: Initialize Bubblewrap project
       - name: Preconfigure Bubblewrap paths
         run: |
           mkdir -p "$HOME/.bubblewrap" "$HOME/.config/bubblewrap"
@@ -48,29 +46,11 @@ jobs:
       - name: Initialize Bubblewrap project (non-interactive)
         run: |
           mkdir -p apk-build && cd apk-build
-          expect <<'EOF'
-          set timeout -1
-          log_user 1
-          spawn bubblewrap init --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json --directory .
-          expect {
-            -re {.*install the JDK.*} {
-              send "n\r"
-              exp_continue
-            }
-            -re {.*existing JDK.*} {
-              send "$env(JAVA_HOME)\r"
-              exp_continue
-            }
-            -re {.*install the Android SDK.*} {
-              send "n\r"
-              exp_continue
-            }
-            -re {.*existing Android SDK.*} {
-              send "$env(ANDROID_SDK_ROOT)\r"
-              exp_continue
-            }
-            eof
-          }
+          script -q -e -c "bubblewrap init --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json --directory ." /dev/null <<EOF
+          n
+          $JAVA_HOME
+          n
+          $ANDROID_SDK_ROOT
           EOF
         env:
           BUBBLEWRAP_SKIP_UPDATE_CHECK: true
