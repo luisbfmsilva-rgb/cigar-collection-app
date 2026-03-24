@@ -36,7 +36,7 @@ jobs:
       - name: Initialize Bubblewrap project
         run: |
           mkdir apk-build && cd apk-build
-          bubblewrap init --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json --directory . --jdkPath "$JAVA_HOME" --androidSdkPath "$ANDROID_SDK_ROOT"
+          yes | bubblewrap init --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json --directory . --jdkPath "$JAVA_HOME" --androidSdkPath "$ANDROID_SDK_ROOT"
         env:
           BUBBLEWRAP_SKIP_UPDATE_CHECK: true
 
