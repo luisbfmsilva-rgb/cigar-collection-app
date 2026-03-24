@@ -1,10 +1,9 @@
+name: Build APK (PWA → Android) v2
+
 on:
   push:
     branches: [main, master]
   workflow_dispatch:
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build-apk:
@@ -19,7 +18,7 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Setup Java (required by Bubblewrap)
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -31,19 +30,48 @@ jobs:
       - name: Install Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
 
-      - name: Configure Bubblewrap environment
+      - name: Install expect
+        run: sudo apt-get update && sudo apt-get install -y expect
+
+      - name: Preconfigure Bubblewrap paths
         run: |
-          mkdir -p "$HOME/.bubblewrap"
+          mkdir -p "$HOME/.bubblewrap" "$HOME/.config/bubblewrap"
           cat > "$HOME/.bubblewrap/config.json" <<EOF
+          {"jdkPath":"$JAVA_HOME","androidSdkPath":"$ANDROID_SDK_ROOT"}
+          EOF
+          cat > "$HOME/.config/bubblewrap/config.json" <<EOF
           {"jdkPath":"$JAVA_HOME","androidSdkPath":"$ANDROID_SDK_ROOT"}
           EOF
         env:
           BUBBLEWRAP_SKIP_UPDATE_CHECK: true
 
-      - name: Initialize Bubblewrap project
+      - name: Initialize Bubblewrap project (non-interactive)
         run: |
-          mkdir apk-build && cd apk-build
-          bubblewrap init --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json --directory .
+          mkdir -p apk-build && cd apk-build
+          expect <<'EOF'
+          set timeout -1
+          log_user 1
+          spawn bubblewrap init --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json --directory .
+          expect {
+            -re {.*install the JDK.*} {
+              send "n\r"
+              exp_continue
+            }
+            -re {.*existing JDK.*} {
+              send "$env(JAVA_HOME)\r"
+              exp_continue
+            }
+            -re {.*install the Android SDK.*} {
+              send "n\r"
+              exp_continue
+            }
+            -re {.*existing Android SDK.*} {
+              send "$env(ANDROID_SDK_ROOT)\r"
+              exp_continue
+            }
+            eof
+          }
+          EOF
         env:
           BUBBLEWRAP_SKIP_UPDATE_CHECK: true
 
@@ -56,10 +84,6 @@ jobs:
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
-        with:
-          name: cigar-club-apk
-          path: apk-build/*.apk
-          retention-days: 30
         with:
           name: cigar-club-apk
           path: apk-build/*.apk
