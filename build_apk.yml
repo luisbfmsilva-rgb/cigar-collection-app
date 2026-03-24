@@ -1,4 +1,4 @@
-name: Build APK (PWA → Android) Docker
+name: Build APK (PWA → Android) CI
 
 on:
   push:
@@ -13,24 +13,50 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Initialize TWA project with Bubblewrap Docker image
-        run: |
-          mkdir -p apk-build
-          docker run --rm \
-            -v "${PWD}/apk-build:/work" \
-            -w /work \
-            -e BUBBLEWRAP_SKIP_UPDATE_CHECK=true \
-            ghcr.io/googlechromelabs/bubblewrap:latest \
-            init --manifest "https://${{ secrets.APP_DOMAIN }}/manifest.json" --directory .
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-      - name: Build APK with Bubblewrap Docker image
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Bubblewrap CLI
+        run: npm install -g @bubblewrap/cli
+
+      - name: Configure Bubblewrap paths
         run: |
-          docker run --rm \
-            -v "${PWD}/apk-build:/work" \
-            -w /work \
-            -e BUBBLEWRAP_SKIP_UPDATE_CHECK=true \
-            ghcr.io/googlechromelabs/bubblewrap:latest \
-            build --skipPwaValidation
+          mkdir -p "$HOME/.bubblewrap" "$HOME/.config/bubblewrap"
+          cat > "$HOME/.bubblewrap/config.json" <<EOF
+          {"jdkPath":"$JAVA_HOME","androidSdkPath":"$ANDROID_SDK_ROOT"}
+          EOF
+          cat > "$HOME/.config/bubblewrap/config.json" <<EOF
+          {"jdkPath":"$JAVA_HOME","androidSdkPath":"$ANDROID_SDK_ROOT"}
+          EOF
+        env:
+          BUBBLEWRAP_SKIP_UPDATE_CHECK: true
+
+      - name: Initialize Bubblewrap project
+        run: |
+          mkdir -p apk-build && cd apk-build
+          CI=true bubblewrap init --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json --directory .
+        env:
+          CI: true
+          BUBBLEWRAP_SKIP_UPDATE_CHECK: true
+
+      - name: Build APK
+        run: |
+          cd apk-build
+          CI=true bubblewrap build --skipPwaValidation
+        env:
+          CI: true
+          BUBBLEWRAP_SKIP_UPDATE_CHECK: true
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
