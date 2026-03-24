@@ -1,12 +1,15 @@
-name: Build APK (PWA → Android)
+name: Android APK (Expo prebuild)
 
 on:
   push:
     branches: [main, master]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  build-apk:
+  build-debug-apk:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,36 +20,36 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'pnpm'
 
-      - name: Setup Java (required by Bubblewrap)
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Bubblewrap CLI
-        run: npm install -g @bubblewrap/cli
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Initialize Bubblewrap project
-        run: |
-          mkdir apk-build && cd apk-build
-          bubblewrap init --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json --directory .
-        env:
-          BUBBLEWRAP_SKIP_UPDATE_CHECK: true
+      - name: Generate native Android project
+        run: npx expo prebuild --platform android --non-interactive
 
-      - name: Build APK
+      - name: Build debug APK
         run: |
-          cd apk-build
-          bubblewrap build --skipPwaValidation
-        env:
-          BUBBLEWRAP_SKIP_UPDATE_CHECK: true
+          cd android
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cigar-club-apk
-          path: apk-build/*.apk
+          name: cigar-collection-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
           retention-days: 30
