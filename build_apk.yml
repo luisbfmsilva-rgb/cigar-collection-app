@@ -1,18 +1,16 @@
-name: Build APK (TWA → Android)
+name: Build APK (TWA)
 
 on:
   push:
     branches: [main, master]
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
-
-    env:
-      APP_URL: https://${{ secrets.APP_DOMAIN }}
-      APP_NAME: Cigar Club
-      APP_PACKAGE: com.cigarclub.app
 
     steps:
       - name: Checkout
@@ -30,31 +28,32 @@ jobs:
       - name: Accept Android licenses
         run: yes | sdkmanager --licenses || true
 
-      - name: Clone TWA template
+      - name: Install build tools and platform
         run: |
-          git clone --depth 1 https://github.com/GoogleChrome/android-browser-helper.git twa-template
-          cp -r twa-template/demos/custom-tabs-oauth2/. apk-build/ 2>/dev/null || \
-          cp -r twa-template/demos/twa-basic/. apk-build/
+          sdkmanager "platforms;android-34" "build-tools;34.0.0"
 
-      - name: Configure TWA app
+      - name: Download Gradle wrapper JAR
         run: |
-          cd apk-build
-          # Update package name and URL in build.gradle
-          find . -name "*.gradle" -exec sed -i \
-            "s|applicationId \".*\"|applicationId \"$APP_PACKAGE\"|g" {} \;
-          # Update strings.xml with app URL and name
-          find . -name "strings.xml" -exec sed -i \
-            "s|https://.*\"|$APP_URL\"|g; s|<string name=\"app_name\">.*</string>|<string name=\"app_name\">$APP_NAME</string>|g" {} \;
+          mkdir -p android/gradle/wrapper
+          curl -L -o android/gradle/wrapper/gradle-wrapper.jar \
+            https://github.com/gradle/gradle/raw/v8.6.0/gradle/wrapper/gradle-wrapper.jar
+
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
+      - name: Replace APP_DOMAIN in strings.xml
+        run: |
+          sed -i "s|APP_DOMAIN_PLACEHOLDER|${{ secrets.APP_DOMAIN }}|g" \
+            android/app/src/main/res/values/strings.xml
 
       - name: Build debug APK
         run: |
-          cd apk-build
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          cd android
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Find and upload APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: cigar-club-debug-apk
-          path: apk-build/**/*.apk
+          path: android/app/build/outputs/apk/debug/*.apk
           retention-days: 30
