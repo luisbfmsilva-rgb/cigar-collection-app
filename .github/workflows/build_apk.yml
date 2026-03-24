@@ -1,4 +1,4 @@
-ame: Android APK (Expo prebuild)
+name: Android APK (Expo prebuild)
 
 on:
   push:
