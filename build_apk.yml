@@ -16,7 +16,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java 17
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Java (required by Bubblewrap)
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -25,34 +30,28 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Accept Android licenses
-        run: yes | sdkmanager --licenses || true
+      - name: Install Bubblewrap CLI
+        run: npm install -g @bubblewrap/cli
 
-      - name: Install platform and build tools
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
-
-      - name: Download Gradle wrapper JAR
+      - name: Initialize Bubblewrap project
         run: |
-          mkdir -p android/gradle/wrapper
-          curl -L -o android/gradle/wrapper/gradle-wrapper.jar \
-            https://github.com/gradle/gradle/raw/v8.6.0/gradle/wrapper/gradle-wrapper.jar
+          mkdir apk-build && cd apk-build
+          bubblewrap init --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json --directory .
+          printf 'n\n' | bubblewrap init --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json --directory .
+        env:
+          BUBBLEWRAP_SKIP_UPDATE_CHECK: true
 
-      - name: Replace APP_DOMAIN in strings.xml
+      - name: Build APK
         run: |
-          sed -i "s|APP_DOMAIN_PLACEHOLDER|${{ secrets.APP_DOMAIN }}|g" \
-            android/app/src/main/res/values/strings.xml
+          cd apk-build
+          bubblewrap build --skipPwaValidation
+        env:
+          BUBBLEWRAP_SKIP_UPDATE_CHECK: true
 
-      - name: Make gradlew executable
-        run: chmod +x android/gradlew
-
-      - name: Build debug APK
-        run: |
-          cd android
-          ./gradlew assembleDebug --no-daemon --stacktrace
-
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cigar-club-debug-apk
-          path: android/app/build/outputs/apk/debug/*.apk
+          name: cigar-club-apk
+          path: apk-build/*.apk
           retention-days: 30
+        
