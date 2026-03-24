@@ -1,6 +1,8 @@
-name: Android APK (legacy entrypoint)
+name: Android APK (Expo prebuild)
 
 on:
+  push:
+    branches: [main, master]
   workflow_dispatch:
 
 permissions:
