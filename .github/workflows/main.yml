@@ -30,6 +30,11 @@ jobs:
       - name: Install Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
 
+      - name: Configure Bubblewrap paths
+        run: bubblewrap updateConfig --jdkPath "$JAVA_HOME" --androidSdkPath "$ANDROID_SDK_ROOT"
+        env:
+          BUBBLEWRAP_SKIP_UPDATE_CHECK: true
+
       - name: Initialize Bubblewrap project
         run: |
           mkdir apk-build && cd apk-build
