@@ -1,4 +1,4 @@
-name: Build APK (PWA → Android) v2
+name: Build APK (PWA → Android) Docker
 
 on:
   push:
@@ -13,54 +13,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Bubblewrap CLI
-        run: npm install -g @bubblewrap/cli
-
-      - name: Initialize Bubblewrap project
-      - name: Preconfigure Bubblewrap paths
+      - name: Initialize TWA project with Bubblewrap Docker image
         run: |
-          mkdir -p "$HOME/.bubblewrap" "$HOME/.config/bubblewrap"
-          cat > "$HOME/.bubblewrap/config.json" <<EOF
-          {"jdkPath":"$JAVA_HOME","androidSdkPath":"$ANDROID_SDK_ROOT"}
-          EOF
-          cat > "$HOME/.config/bubblewrap/config.json" <<EOF
-          {"jdkPath":"$JAVA_HOME","androidSdkPath":"$ANDROID_SDK_ROOT"}
-          EOF
-        env:
-          BUBBLEWRAP_SKIP_UPDATE_CHECK: true
+          mkdir -p apk-build
+          docker run --rm \
+            -v "${PWD}/apk-build:/work" \
+            -w /work \
+            -e BUBBLEWRAP_SKIP_UPDATE_CHECK=true \
+            ghcr.io/googlechromelabs/bubblewrap:latest \
+            init --manifest "https://${{ secrets.APP_DOMAIN }}/manifest.json" --directory .
 
-      - name: Initialize Bubblewrap project (non-interactive)
+      - name: Build APK with Bubblewrap Docker image
         run: |
-          mkdir -p apk-build && cd apk-build
-          script -q -e -c "bubblewrap init --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json --directory ." /dev/null <<EOF
-          n
-          $JAVA_HOME
-          n
-          $ANDROID_SDK_ROOT
-          EOF
-        env:
-          BUBBLEWRAP_SKIP_UPDATE_CHECK: true
-
-      - name: Build APK
-        run: |
-          cd apk-build
-          bubblewrap build --skipPwaValidation
-        env:
-          BUBBLEWRAP_SKIP_UPDATE_CHECK: true
+          docker run --rm \
+            -v "${PWD}/apk-build:/work" \
+            -w /work \
+            -e BUBBLEWRAP_SKIP_UPDATE_CHECK=true \
+            ghcr.io/googlechromelabs/bubblewrap:latest \
+            build --skipPwaValidation
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
