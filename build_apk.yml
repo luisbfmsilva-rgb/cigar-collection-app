@@ -1,4 +1,4 @@
-name: Build APK (PWA → Android)
+name: Build APK (TWA → Android)
 
 on:
   push:
@@ -9,14 +9,14 @@ jobs:
   build-apk:
     runs-on: ubuntu-latest
 
+    env:
+      APP_URL: https://${{ secrets.APP_DOMAIN }}
+      APP_NAME: Cigar Club
+      APP_PACKAGE: com.cigarclub.app
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
 
       - name: Setup Java 17
         uses: actions/setup-java@v4
@@ -30,28 +30,31 @@ jobs:
       - name: Accept Android licenses
         run: yes | sdkmanager --licenses || true
 
-      - name: Install Bubblewrap CLI
-        run: npm install -g @bubblewrap/cli
-
-      - name: Initialize Bubblewrap project
+      - name: Clone TWA template
         run: |
-          mkdir apk-build && cd apk-build
-          printf "n\n" | bubblewrap init \
-            --manifest https://${{ secrets.APP_DOMAIN }}/manifest.json \
-            --directory .
-        env:
-          BUBBLEWRAP_SKIP_UPDATE_CHECK: "true"
+          git clone --depth 1 https://github.com/GoogleChrome/android-browser-helper.git twa-template
+          cp -r twa-template/demos/custom-tabs-oauth2/. apk-build/ 2>/dev/null || \
+          cp -r twa-template/demos/twa-basic/. apk-build/
 
-      - name: Build APK
+      - name: Configure TWA app
         run: |
           cd apk-build
-          printf "\n" | bubblewrap build --skipPwaValidation
-        env:
-          BUBBLEWRAP_SKIP_UPDATE_CHECK: "true"
+          # Update package name and URL in build.gradle
+          find . -name "*.gradle" -exec sed -i \
+            "s|applicationId \".*\"|applicationId \"$APP_PACKAGE\"|g" {} \;
+          # Update strings.xml with app URL and name
+          find . -name "strings.xml" -exec sed -i \
+            "s|https://.*\"|$APP_URL\"|g; s|<string name=\"app_name\">.*</string>|<string name=\"app_name\">$APP_NAME</string>|g" {} \;
 
-      - name: Upload APK artifact
+      - name: Build debug APK
+        run: |
+          cd apk-build
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Find and upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: cigar-club-apk
-          path: apk-build/*.apk
+          name: cigar-club-debug-apk
+          path: apk-build/**/*.apk
           retention-days: 30
