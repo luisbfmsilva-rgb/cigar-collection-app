@@ -1,4 +1,4 @@
-name: Android APK (Expo prebuild)
+name: Android APK (Expo prebuild) v2
 
 on:
   push:
@@ -17,14 +17,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Workflow version marker
+        run: echo "Using workflow .github/workflows/apk-build.yml v2 (no setup-node)"
+
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: '20'
-          cache: npm
+      - name: Verify Node/npm on runner
+        run: |
+          node --version
+          npm --version
 
       - name: Install pnpm
         run: |
