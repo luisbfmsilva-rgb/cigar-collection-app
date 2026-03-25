@@ -1,0 +1,66 @@
+name: Android APK (Expo prebuild) v2
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+  workflow_call:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-debug-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Workflow version marker
+        run: echo "Using workflow .github/workflows/apk-build.yml v2 (no setup-node)"
+
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Verify Node/npm on runner
+        run: |
+          node --version
+          npm --version
+
+      - name: Install pnpm
+        run: |
+          npm install -g pnpm@9
+          echo "$(npm config get prefix)/bin" >> "$GITHUB_PATH"
+
+      - name: Verify pnpm
+        run: |
+          command -v pnpm
+          pnpm --version
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate native Android project
+        run: npx expo prebuild --platform android --non-interactive
+
+      - name: Build debug APK
+        run: |
+          cd android
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: cigar-collection-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          retention-days: 30
