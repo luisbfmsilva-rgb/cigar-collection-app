@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  build-debug-apk:
+  build-release-apk:
     runs-on: ubuntu-latest
 
     steps:
@@ -53,14 +53,18 @@ jobs:
       - name: Generate native Android project
         run: npx expo prebuild --platform android --non-interactive
 
-      - name: Build debug APK
+      - name: Ensure gradlew is executable
+        run: chmod +x android/gradlew
+
+      - name: Build release APK (bundled JS, no Metro)
         run: |
+          set -euxo pipefail
           cd android
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew :app:createBundleReleaseJsAndAssets :app:assembleRelease --no-daemon --stacktrace --warning-mode all --info
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v5
         with:
-          name: cigar-collection-debug-apk
-          path: android/app/build/outputs/apk/debug/*.apk
+          name: cigar-collection-release-apk
+          path: android/app/build/outputs/apk/release/*.apk
           retention-days: 30
