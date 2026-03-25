@@ -53,14 +53,14 @@ jobs:
       - name: Generate native Android project
         run: npx expo prebuild --platform android --non-interactive
 
-      - name: Build debug APK
+      - name: Build debug APK (bundled JS, no Metro)
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew :app:bundleDebugJsAndAssets :app:assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v5
         with:
-          name: cigar-collection-debug-apk
+          name: cigar-collection-debug-offline-apk
           path: android/app/build/outputs/apk/debug/*.apk
           retention-days: 30
