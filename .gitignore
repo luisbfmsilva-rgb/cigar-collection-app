@@ -40,5 +40,3 @@ yarn-error.*
 /ios
 /android
 
-# secrets
-.env
