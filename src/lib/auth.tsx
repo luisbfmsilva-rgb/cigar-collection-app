@@ -46,11 +46,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await loadProfile(data.session?.user.id);
       setReady(true);
     });
+    let currentUser: string | undefined;
     const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
       setSession(next);
+      const nextUser = next?.user.id;
+      if (nextUser === currentUser) return; // token refresh etc.: keep the loaded profile
+      currentUser = nextUser;
       setProfileLoaded(false);
       // Defer the query so it does not run inside the auth callback.
-      setTimeout(() => loadProfile(next?.user.id), 0);
+      setTimeout(() => loadProfile(nextUser), 0);
     });
     return () => sub.subscription.unsubscribe();
   }, [loadProfile]);

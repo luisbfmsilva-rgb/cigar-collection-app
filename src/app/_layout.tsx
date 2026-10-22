@@ -21,8 +21,6 @@ import { colors, fonts, space, type } from '@/lib/theme';
 
 export { ErrorBoundary } from 'expo-router';
 
-export const unstable_settings = { anchor: '(tabs)' };
-
 SplashScreen.preventAutoHideAsync();
 
 const navTheme = {
@@ -78,6 +76,9 @@ function RootNavigator() {
   if (!ready) return <Loading />;
 
   const signedIn = !!session && !!profile;
+  // Where each state belongs. Every protected group redirects here, so a screen that becomes
+  // off-limits (e.g. sign-in right after an account is created) never bounces between guards.
+  const home = !ageConfirmed ? '/age-gate' : !session ? '/sign-in' : needsProfile ? '/profile-setup' : '/';
   return (
     <Stack
       screenOptions={{
@@ -90,20 +91,20 @@ function RootNavigator() {
         headerShadowVisible: false,
       }}
     >
-      <Stack.Protected guard={!ageConfirmed}>
+      <Stack.Protected guard={!ageConfirmed} redirectTo={home}>
         <Stack.Screen name="age-gate" options={{ headerShown: false }} />
       </Stack.Protected>
 
-      <Stack.Protected guard={ageConfirmed && !session}>
+      <Stack.Protected guard={ageConfirmed && !session} redirectTo={home}>
         <Stack.Screen name="sign-in" options={{ headerShown: false }} />
         <Stack.Screen name="email-auth" options={{ title: '' }} />
       </Stack.Protected>
 
-      <Stack.Protected guard={ageConfirmed && !!session && needsProfile}>
+      <Stack.Protected guard={ageConfirmed && !!session && needsProfile} redirectTo={home}>
         <Stack.Screen name="profile-setup" options={{ headerShown: false }} />
       </Stack.Protected>
 
-      <Stack.Protected guard={ageConfirmed && signedIn}>
+      <Stack.Protected guard={ageConfirmed && signedIn} redirectTo={home}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="checkin/new" options={{ title: '' }} />
         <Stack.Screen name="checkin/pick-cigar" options={{ title: '', presentation: 'modal' }} />
