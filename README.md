@@ -16,7 +16,14 @@ Feito com Expo (React Native, SDK 58) e Supabase.
 - Influenciadores: pedido de perfil verificado, selo, vídeos e artigos no perfil e na ficha do charuto, etiqueta de parceria paga, bloqueio automático de links de loja e afiliados.
 - Umidor: vários umidores, estoque, tempo de guarda, aviso de descanso, leituras manuais de umidade e temperatura (°C ou °F), faixa ideal e lista de desejos.
 - Badges automáticos (primeiro check-in, 10, 50, 100, Orgulho Brasileiro, 5 países, maduro, crítico, lounges, sommelier).
-- Painel de moderação (aprovar charutos e influenciadores, tratar denúncias).
+- Tipos de conta (versão 1.1):
+  - **Aficionado**: a conta padrão de todo mundo.
+  - **Expert**: sugere correções no catálogo, que entram depois da aprovação de um moderador.
+  - **Fabricante**: administra as próprias marcas. Corrige qualquer charuto dela na hora, publica artigos que aparecem em destaque no feed e cria badges para dar aos maiores fãs da marca.
+  - O pedido para virar Expert ou Fabricante é feito no app (Configurações → Tipo de conta) e aprovado no painel de moderação. Lá o moderador também escolhe quais marcas o Fabricante vai administrar.
+  - O selo de **influenciador verificado** continua separado e vale para qualquer tipo de conta.
+- Página da marca: artigos, charutos, ranking de maiores fãs e badges da marca.
+- Painel de moderação: aprovar charutos, correções do catálogo, pedidos de conta e influenciadores, e tratar denúncias.
 - Inglês, português e espanhol.
 - Exclusão de conta dentro do app (exigida pela Apple e pelo Google).
 
@@ -49,7 +56,11 @@ No Supabase, em **Authentication → Sign In / Providers**:
 - **Apple**: ative e configure o Services ID e a chave do Apple Developer.
 - Em **Authentication → URL Configuration**, adicione `longash://auth-callback` nos Redirect URLs.
 
-### 4. Virar administrador
+### 4. Atualizar um banco que já existe
+
+Quem já rodou o `setup_all.sql` antes da versão 1.1 só precisa rodar, no SQL Editor, o arquivo `supabase/migrations/20261022000001_account_types.sql`.
+
+### 5. Virar administrador
 
 Depois de criar sua conta no app, rode no SQL Editor:
 
@@ -59,7 +70,7 @@ update public.profiles set is_admin = true where username = 'seu_usuario';
 
 A opção **Moderação** aparece em Configurações.
 
-### 5. Publicar nas lojas
+### 6. Publicar nas lojas
 
 Com uma conta [Expo](https://expo.dev), use o EAS (os builds rodam na nuvem, sem precisar de Mac):
 

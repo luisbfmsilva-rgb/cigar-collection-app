@@ -37,6 +37,9 @@ export default function Settings() {
         <SectionTitle title={t('settings.language')} />
         <LanguagePicker onChange={(locale) => updateProfile({ locale }).then(refreshProfile).catch(() => {})} />
 
+        <SectionTitle title={t('account.title')} />
+        <Item icon="id-card-outline" label={`${t('account.title')}: ${t(`account.types.${me.account_type}`)}`} onPress={() => router.push('/account')} />
+
         {me.is_admin ? (
           <>
             <SectionTitle title={t('settings.admin')} />

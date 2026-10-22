@@ -5,7 +5,7 @@ import { Alert, Linking, Pressable, Text, View } from 'react-native';
 import { CheckinCard } from '@/components/CheckinCard';
 import { Avatar, Button, Card, Chip, Empty, Icon, IconButton, Pill, Row, SectionTitle, Segmented } from '@/components/ui';
 import { localized, useI18n } from '@/i18n';
-import { creatorLinks, deleteCreatorLink, feed, isFollowing, setBlock, setFollow, userBadges, userFlavorProfile } from '@/lib/api';
+import { creatorLinks, deleteCreatorLink, feed, isFollowing, setBlock, setFollow, userBadges, userBrandBadges, userFlavorProfile } from '@/lib/api';
 import { useFlavors } from '@/lib/flavors';
 import { countryName } from '@/lib/format';
 import { publicUrl } from '@/lib/supabase';
@@ -25,6 +25,7 @@ export function ProfileView({ profile, isMe, onChanged }: { profile: Profile; is
   const following = useAsync(() => (isMe ? Promise.resolve(false) : isFollowing(profile.id)), [profile.id, isMe]);
   const checkins = useAsync(() => feed({ kind: 'user', userId: profile.id }), [profile.id]);
   const badges = useAsync(() => userBadges(profile.id), [profile.id]);
+  const brandBadges = useAsync(() => userBrandBadges(profile.id), [profile.id]);
   const links = useAsync(() => (verified ? creatorLinks(profile.id) : Promise.resolve([])), [profile.id, verified]);
   const flavorProfile = useAsync(() => userFlavorProfile(profile.id), [profile.id]);
   const [busy, setBusy] = useState(false);
@@ -70,6 +71,9 @@ export function ProfileView({ profile, isMe, onChanged }: { profile: Profile; is
           </Row>
           <Text style={type.caption}>@{profile.username}{profile.city || profile.country ? ` · ${[profile.city, countryName(profile.country, locale)].filter(Boolean).join(', ')}` : ''}</Text>
           {verified ? <Text style={[type.caption, { color: colors.gold }]}>{profile.creator_headline || t('profile.verified')}</Text> : null}
+          {profile.account_type !== 'aficionado' ? (
+            <View style={{ alignSelf: 'flex-start', marginTop: 2 }}><Pill label={t(`account.types.${profile.account_type}`)} tone={profile.account_type === 'manufacturer' ? 'accent' : 'success'} /></View>
+          ) : null}
         </View>
         {!isMe ? <IconButton icon="ellipsis-horizontal" label={t('common.more')} onPress={more} /> : null}
       </Row>
@@ -153,6 +157,16 @@ export function ProfileView({ profile, isMe, onChanged }: { profile: Profile; is
 
       {tab === 'badges' ? (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
+          {(brandBadges.data ?? []).map(({ badge, awarded_at, message }) => (
+            <Card key={badge.id} style={{ width: '48%', alignItems: 'center', gap: 6, padding: space.md, borderColor: colors.gold }}
+              onPress={badge.brand ? () => router.push(`/brand/${badge.brand!.id}`) : undefined}>
+              <Icon name={(badge.icon as never) ?? 'ribbon'} size={30} color={colors.gold} />
+              <Text style={[type.label, { textAlign: 'center' }]}>{badge.name}</Text>
+              {badge.brand ? <Text style={[type.caption, { textAlign: 'center', color: colors.gold }]}>{badge.brand.name}</Text> : null}
+              {message ? <Text style={[type.caption, { textAlign: 'center' }]}>“{message}”</Text> : null}
+              <Text style={[type.caption, { fontSize: 11 }]}>{new Date(awarded_at).toLocaleDateString()}</Text>
+            </Card>
+          ))}
           {(badges.data ?? []).map(({ badge, earned_at }) => (
             <Card key={badge.code} style={{ width: '48%', alignItems: 'center', gap: 6, padding: space.md }}>
               <Icon name={(badge.icon as never) ?? 'ribbon'} size={30} color={colors.accent} />
@@ -161,7 +175,7 @@ export function ProfileView({ profile, isMe, onChanged }: { profile: Profile; is
               <Text style={[type.caption, { fontSize: 11 }]}>{new Date(earned_at).toLocaleDateString()}</Text>
             </Card>
           ))}
-          {(badges.data ?? []).length === 0 && !badges.loading ? <Empty text={t('profile.noBadges')} icon="ribbon-outline" /> : null}
+          {(badges.data ?? []).length === 0 && !(brandBadges.data ?? []).length && !badges.loading ? <Empty text={t('profile.noBadges')} icon="ribbon-outline" /> : null}
         </View>
       ) : null}
     </View>

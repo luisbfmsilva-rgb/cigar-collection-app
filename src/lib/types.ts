@@ -6,6 +6,8 @@ export type ClubRole = 'owner' | 'moderator' | 'member';
 export type MemberStatus = 'active' | 'invited' | 'requested';
 export type HumidorKind = 'cabinet' | 'desktop' | 'tupperdor' | 'coolerdor' | 'walk_in' | 'other';
 export type CreatorStatus = 'none' | 'pending' | 'verified' | 'rejected';
+export type AccountType = 'aficionado' | 'expert' | 'manufacturer';
+export type RequestStatus = 'pending' | 'approved' | 'rejected';
 export type LinkKind = 'youtube' | 'instagram' | 'tiktok' | 'article' | 'podcast' | 'other';
 export type MusicSource = 'apple_music' | 'spotify' | 'youtube' | 'link';
 export type TargetKind = 'checkin' | 'club_post' | 'comment' | 'profile' | 'club' | 'cigar' | 'creator_link';
@@ -26,6 +28,7 @@ export type Profile = {
   country: string | null;
   locale: 'en' | 'pt' | 'es';
   is_admin: boolean;
+  account_type: AccountType;
   creator_status: CreatorStatus;
   creator_headline: string | null;
   checkin_count: number;
@@ -117,6 +120,7 @@ export type CheckinFeedRow = {
   display_name: string;
   avatar_url: string | null;
   creator_status: CreatorStatus;
+  account_type: AccountType;
   brand_name: string;
   cigar_line: string;
   cigar_vitola: string | null;
@@ -192,4 +196,47 @@ export type Badge = {
   label_en: string; label_pt: string; label_es: string;
   description_en: string; description_pt: string; description_es: string;
   icon: string;
+};
+
+export type Brand = { id: string; name: string; country: string | null; website: string | null; approved: boolean };
+
+export type BrandArticle = {
+  id: string;
+  brand_id: string;
+  author_id: string | null;
+  title: string;
+  body: string;
+  link_url: string | null;
+  cigar_id: string | null;
+  cover_path: string | null;
+  featured: boolean;
+  created_at: string;
+  brand?: { id: string; name: string } | null;
+};
+
+export type BrandBadge = { id: string; brand_id: string; name: string; description: string | null; icon: string; created_at: string };
+
+export type BrandBadgeAward = { awarded_at: string; message: string | null; badge: BrandBadge & { brand: { id: string; name: string } | null } };
+
+export type BrandFan = {
+  user_id: string; username: string; display_name: string; avatar_url: string | null;
+  account_type: AccountType; creator_status: CreatorStatus;
+  checkins: number; unique_cigars: number; avg_rating: number | null; last_at: string;
+};
+
+export type AccountApplication = {
+  id: string; user_id: string; requested_type: AccountType; status: RequestStatus;
+  experience: string | null; company: string | null; brand_names: string | null; website: string | null;
+  contact: string | null; message: string | null; created_at: string;
+};
+
+/** Fields an Expert can propose and a manufacturer can edit. */
+export const EDITABLE_CIGAR_FIELDS = [
+  'line', 'vitola', 'length_in', 'ring_gauge', 'wrapper', 'wrapper_shade', 'binder', 'filler', 'country', 'factory', 'strength', 'status', 'barcodes',
+] as const;
+export type CigarPatch = Partial<Pick<Cigar, (typeof EDITABLE_CIGAR_FIELDS)[number]>>;
+
+export type CigarSuggestion = {
+  id: string; cigar_id: string; author_id: string | null; changes: CigarPatch; note: string | null;
+  status: RequestStatus; created_at: string;
 };

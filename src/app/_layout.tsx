@@ -115,6 +115,14 @@ function RootNavigator() {
         <Stack.Screen name="checkin/[id]" options={{ title: '' }} />
         <Stack.Screen name="cigar/[id]" options={{ title: '' }} />
         <Stack.Screen name="cigar/new" options={{ title: '' }} />
+        <Stack.Screen name="cigar/edit" options={{ title: '' }} />
+        <Stack.Screen name="brand/[id]" options={{ title: '' }} />
+        <Stack.Screen name="brand/article" options={{ title: '' }} />
+        <Stack.Screen name="brand/badge-new" options={{ title: '', presentation: 'modal' }} />
+        <Stack.Screen name="brand/award" options={{ title: '', presentation: 'modal' }} />
+        <Stack.Screen name="article/[id]" options={{ title: '' }} />
+        <Stack.Screen name="account/index" options={{ title: '' }} />
+        <Stack.Screen name="account/apply" options={{ title: '' }} />
         <Stack.Screen name="scan" options={{ title: '', presentation: 'fullScreenModal', headerShown: false }} />
         <Stack.Screen name="user/[username]" options={{ title: '' }} />
         <Stack.Screen name="clubs/index" options={{ title: '' }} />

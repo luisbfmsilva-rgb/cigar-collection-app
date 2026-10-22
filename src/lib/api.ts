@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import type {
+  AccountApplication, AccountType, Brand, BrandArticle, BrandBadge, BrandBadgeAward, BrandFan, CigarPatch, CigarSuggestion,
   Badge, CheckinFeedRow, Cigar, Club, ClubRole, CreatorLink, FlavorFamily, FlavorNote, FlavorPick, Humidor,
   HumidorItem, LinkKind, MemberStatus, Music, Pairing, Profile, Reading, Strength, Venue, VenueKind, Visibility,
 } from './types';
@@ -617,8 +618,185 @@ export async function openReports() {
 export async function resolveReport(r: ReportRow, removeContent: boolean) {
   const me = await uid();
   if (removeContent) {
-    const table = { checkin: 'checkins', club_post: 'club_posts', comment: 'comments', creator_link: 'creator_links' }[r.target_kind];
+    const table = { checkin: 'checkins', club_post: 'club_posts', comment: 'comments', creator_link: 'creator_links', brand_article: 'brand_articles' }[r.target_kind];
     if (table) must(await supabase.from(table).delete().eq('id', r.target_id));
   }
   must(await supabase.from('reports').update({ status: removeContent ? 'actioned' : 'dismissed', handled_by: me }).eq('id', r.id));
+}
+
+// ---------------------------------------------------------------------------
+// Account types (Aficionado / Expert / Manufacturer)
+// ---------------------------------------------------------------------------
+
+export async function myApplications() {
+  const me = await uid();
+  return must(await supabase.from('account_applications').select('*').eq('user_id', me)
+    .order('created_at', { ascending: false })) as AccountApplication[];
+}
+
+export async function applyAccountType(input: {
+  requested_type: Exclude<AccountType, 'aficionado'>; experience?: string; company?: string; brand_names?: string;
+  website?: string; contact?: string; message?: string;
+}) {
+  const me = await uid();
+  const clean = (v?: string) => v?.trim() || null;
+  must(await supabase.from('account_applications').insert({
+    user_id: me, requested_type: input.requested_type, experience: clean(input.experience), company: clean(input.company),
+    brand_names: clean(input.brand_names), website: clean(input.website), contact: clean(input.contact), message: clean(input.message),
+  }));
+}
+
+export async function cancelApplication(id: string) {
+  must(await supabase.from('account_applications').delete().eq('id', id));
+}
+
+export type AccountApplicationRow = AccountApplication & { profile: Profile };
+
+export async function pendingApplications() {
+  return must(await supabase.from('account_applications')
+    .select('*, profile:profiles!account_applications_user_id_fkey(*)')
+    .eq('status', 'pending').order('created_at')) as unknown as AccountApplicationRow[];
+}
+
+export async function reviewApplication(id: string, approve: boolean, brandIds: string[] = []) {
+  must(await supabase.rpc('review_account_application', { app: id, approve, brand_ids: brandIds }));
+}
+
+// ---------------------------------------------------------------------------
+// Brands, manufacturers, articles and brand badges
+// ---------------------------------------------------------------------------
+
+export async function getBrand(id: string) {
+  return must(await supabase.from('brands').select('id, name, country, website, approved').eq('id', id).maybeSingle()) as Brand | null;
+}
+
+export async function brandCigars(brandId: string) {
+  return must(await supabase.from('cigar_list').select('*').eq('brand_id', brandId).eq('approved', true)
+    .order('line').order('ring_gauge').limit(300)) as Cigar[];
+}
+
+export async function brandManagers(brandId: string) {
+  return must(await supabase.from('brand_managers').select('user:profiles!brand_managers_user_id_fkey(*)')
+    .eq('brand_id', brandId)) as unknown as { user: Profile }[];
+}
+
+/** Brands the signed-in manufacturer manages. */
+export async function myBrands() {
+  const me = await uid();
+  return must(await supabase.from('brand_managers').select('brand:brands(id, name, country, website, approved)')
+    .eq('user_id', me)) as unknown as { brand: Brand }[];
+}
+
+export async function isBrandManager(brandId: string) {
+  return must(await supabase.rpc('is_brand_manager', { b: brandId })) as boolean;
+}
+
+const ARTICLE_SELECT = '*, brand:brands(id, name)';
+
+export async function featuredArticles(limit = 6) {
+  return must(await supabase.from('brand_articles').select(ARTICLE_SELECT).eq('featured', true)
+    .order('created_at', { ascending: false }).limit(limit)) as unknown as BrandArticle[];
+}
+
+export async function brandArticles(brandId: string) {
+  return must(await supabase.from('brand_articles').select(ARTICLE_SELECT).eq('brand_id', brandId)
+    .order('created_at', { ascending: false }).limit(50)) as unknown as BrandArticle[];
+}
+
+export async function getArticle(id: string) {
+  return must(await supabase.from('brand_articles').select(ARTICLE_SELECT).eq('id', id).maybeSingle()) as unknown as BrandArticle | null;
+}
+
+export async function saveArticle(input: {
+  id?: string; brand_id: string; title: string; body: string; link_url: string | null; cigar_id: string | null;
+  featured: boolean; coverUri?: string | null; cover_path?: string | null;
+}) {
+  const me = await uid();
+  let cover_path = input.cover_path ?? null;
+  if (input.coverUri) cover_path = await uploadImage('cigar-images', input.coverUri);
+  const row = {
+    brand_id: input.brand_id, title: input.title.trim(), body: input.body.trim(), link_url: input.link_url?.trim() || null,
+    cigar_id: input.cigar_id, featured: input.featured, cover_path,
+  };
+  if (input.id) {
+    must(await supabase.from('brand_articles').update(row).eq('id', input.id));
+    return input.id;
+  }
+  const r = must(await supabase.from('brand_articles').insert({ ...row, author_id: me }).select('id').single()) as { id: string };
+  return r.id;
+}
+
+export async function deleteArticle(id: string) {
+  must(await supabase.from('brand_articles').delete().eq('id', id));
+}
+
+export async function brandBadges(brandId: string) {
+  return must(await supabase.from('brand_badges').select('*').eq('brand_id', brandId).order('created_at')) as BrandBadge[];
+}
+
+export async function createBrandBadge(input: { brand_id: string; name: string; description: string; icon: string }) {
+  const me = await uid();
+  must(await supabase.from('brand_badges').insert({
+    brand_id: input.brand_id, name: input.name.trim(), description: input.description.trim() || null, icon: input.icon, created_by: me,
+  }));
+}
+
+export async function deleteBrandBadge(id: string) {
+  must(await supabase.from('brand_badges').delete().eq('id', id));
+}
+
+export async function awardBrandBadge(badgeId: string, userId: string, message: string) {
+  const me = await uid();
+  must(await supabase.from('brand_badge_awards').upsert({ badge_id: badgeId, user_id: userId, awarded_by: me, message: message.trim() || null }));
+}
+
+export async function badgeHolders(badgeIds: string[]) {
+  if (!badgeIds.length) return [] as { badge_id: string; user_id: string }[];
+  return must(await supabase.from('brand_badge_awards').select('badge_id, user_id').in('badge_id', badgeIds)) as { badge_id: string; user_id: string }[];
+}
+
+export async function userBrandBadges(userId: string) {
+  return must(await supabase.from('brand_badge_awards').select('awarded_at, message, badge:brand_badges(*, brand:brands(id, name))')
+    .eq('user_id', userId).order('awarded_at', { ascending: false })) as unknown as BrandBadgeAward[];
+}
+
+export async function brandTopFans(brandId: string) {
+  return must(await supabase.rpc('brand_top_fans', { b: brandId, max_results: 30 })) as BrandFan[];
+}
+
+// ---------------------------------------------------------------------------
+// Catalog corrections
+// ---------------------------------------------------------------------------
+
+/** Manufacturers (own brand) and admins change a cigar directly. */
+export async function updateCigar(id: string, patch: CigarPatch) {
+  must(await supabase.from('cigars').update(patch).eq('id', id));
+}
+
+/** Experts propose a change; moderators approve it. */
+export async function suggestCigarChange(cigarId: string, changes: CigarPatch, note: string) {
+  const me = await uid();
+  must(await supabase.from('cigar_suggestions').insert({ cigar_id: cigarId, author_id: me, changes, note: note.trim() || null }));
+}
+
+export async function mySuggestions() {
+  const me = await uid();
+  return must(await supabase.from('cigar_suggestions').select('*').eq('author_id', me)
+    .order('created_at', { ascending: false }).limit(50)) as CigarSuggestion[];
+}
+
+export type SuggestionRow = CigarSuggestion & { author: Profile | null; cigar: Cigar | null };
+
+export async function pendingSuggestions() {
+  const rows = must(await supabase.from('cigar_suggestions')
+    .select('*, author:profiles!cigar_suggestions_author_id_fkey(*)')
+    .eq('status', 'pending').order('created_at').limit(100)) as unknown as (CigarSuggestion & { author: Profile | null })[];
+  const ids = [...new Set(rows.map((r) => r.cigar_id))];
+  const cigars = ids.length ? (must(await supabase.from('cigar_list').select('*').in('id', ids)) as Cigar[]) : [];
+  const byId = new Map(cigars.map((c) => [c.id, c]));
+  return rows.map((r) => ({ ...r, cigar: byId.get(r.cigar_id) ?? null })) as SuggestionRow[];
+}
+
+export async function reviewSuggestion(id: string, approve: boolean) {
+  must(await supabase.rpc('review_cigar_suggestion', { sug: id, approve }));
 }

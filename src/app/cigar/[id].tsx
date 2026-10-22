@@ -6,7 +6,8 @@ import { CheckinCard } from '@/components/CheckinCard';
 import { CigarThumb } from '@/components/CigarRow';
 import { Bar, Button, Card, Chip, Empty, ErrorText, Icon, Loading, Pill, Row, Screen, SectionTitle } from '@/components/ui';
 import { localized, useI18n } from '@/i18n';
-import { cigarStats, creatorLinksForCigar, feed, getCigar, setWishlist, wishlistHas } from '@/lib/api';
+import { cigarStats, creatorLinksForCigar, feed, getCigar, isBrandManager, setWishlist, wishlistHas } from '@/lib/api';
+import { useMe } from '@/lib/auth';
 import { useCheckinDraft } from '@/lib/checkinDraft';
 import { useFlavors } from '@/lib/flavors';
 import { countryName, formatRating, formatSize } from '@/lib/format';
@@ -25,6 +26,9 @@ export default function CigarScreen() {
   const videos = useAsync(() => creatorLinksForCigar(id), [id]);
   const wish = useAsync(() => wishlistHas(id), [id]);
   const [wishBusy, setWishBusy] = useState(false);
+  const me = useMe();
+  const brandId = cigar.data?.brand_id;
+  const manager = useAsync(() => (brandId ? isBrandManager(brandId) : Promise.resolve(false)), [brandId]);
 
   if (cigar.loading && !cigar.data) return <Loading />;
   const c = cigar.data;
@@ -66,7 +70,10 @@ export default function CigarScreen() {
         <Row gap={space.lg}>
           <CigarThumb url={c.image_url} size={88} />
           <View style={{ flex: 1, gap: 4 }}>
-            <Text style={type.overline}>{[c.brand_name, countryName(c.country, locale)].filter(Boolean).join(' · ')}</Text>
+            <Text style={type.overline}>
+              <Text style={{ color: colors.accent }} onPress={() => router.push(`/brand/${c.brand_id}`)} accessibilityRole="link">{c.brand_name}</Text>
+              {c.country ? ` · ${countryName(c.country, locale)}` : ''}
+            </Text>
             <Text style={[type.display, { fontSize: 26, lineHeight: 30 }]} accessibilityRole="header">{c.line}</Text>
             {c.status !== 'regular' ? <Pill label={s.cigar.status[c.status]} tone="warning" /> : null}
           </View>
@@ -80,10 +87,17 @@ export default function CigarScreen() {
           <Stat value={c.avg_score100 != null ? String(Math.round(Number(c.avg_score100))) : '–'} label={t('cigar.score100')} />
         </Row>
 
-        <Button
-          label={wish.data ? t('cigar.onWishlist') : t('cigar.wishlist')} icon={wish.data ? 'heart' : 'heart-outline'}
-          variant="ghost" small onPress={toggleWish} loading={wishBusy} style={{ alignSelf: 'flex-start' }}
-        />
+        <Row gap={0} style={{ flexWrap: 'wrap' }}>
+          <Button
+            label={wish.data ? t('cigar.onWishlist') : t('cigar.wishlist')} icon={wish.data ? 'heart' : 'heart-outline'}
+            variant="ghost" small onPress={toggleWish} loading={wishBusy}
+          />
+          {manager.data || me.is_admin ? (
+            <Button label={t('suggest.editButton')} icon="create-outline" variant="ghost" small onPress={() => router.push({ pathname: '/cigar/edit', params: { id } })} />
+          ) : me.account_type === 'expert' && c.approved ? (
+            <Button label={t('suggest.button')} icon="create-outline" variant="ghost" small onPress={() => router.push({ pathname: '/cigar/edit', params: { id } })} />
+          ) : null}
+        </Row>
 
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: space.md }}>
           {specs.filter(([, v]) => v).map(([label, value]) => (
