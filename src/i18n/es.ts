@@ -49,6 +49,12 @@ const es: Strings = {
   scan: {
     title: 'Escanea el código de la caja', permission: 'Long Ash necesita la cámara para leer códigos.', allow: 'Permitir cámara',
     notFound: 'Todavía no hay un puro con el código {{code}}.', addWithCode: 'Añadirlo al catálogo', scanAgain: 'Escanear otra vez',
+    bandTitle: 'Fotografía la vitola', modeBarcode: 'Código de barras', modeBand: 'Vitola (IA)', shoot: 'Tomar foto',
+    bandHint: 'Encuadra la anilla. Buena luz, sin reflejos.', aiRead: 'La IA leyó', isItOne: '¿Es uno de estos?',
+    notBand: 'Eso no parece una anilla de puro.', noCandidates: 'Aún no hay nada parecido en el catálogo.', noneOfThese: 'Ninguno de estos',
+    tryAgain: 'Tomar otra foto', limit: 'Alcanzaste el límite de lecturas de anilla de hoy. Prueba mañana.',
+    knownCode: 'Este código es de "{{name}}". ¿Cuál puro del catálogo es?', knownMaker: 'Este código es de {{maker}}. ¿Qué puro es?',
+    whichOne: 'Búscalo en el catálogo para vincular este código:',
   },
   cigar: {
     community: 'Comunidad', friends: 'Personas que sigues', score100: 'Media 100 pts', wrapper: 'Capa', binder: 'Capote',

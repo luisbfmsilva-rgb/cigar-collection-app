@@ -47,6 +47,12 @@ const en = {
   scan: {
     title: 'Scan the box barcode', permission: 'Long Ash needs the camera to read barcodes.', allow: 'Allow camera',
     notFound: 'No cigar with barcode {{code}} yet.', addWithCode: 'Add it to the catalog', scanAgain: 'Scan again',
+    bandTitle: 'Photograph the band', modeBarcode: 'Barcode', modeBand: 'Band (AI)', shoot: 'Take photo',
+    bandHint: 'Fill the frame with the band. Good light, no glare.', aiRead: 'The AI read', isItOne: 'Is it one of these?',
+    notBand: "That doesn't look like a cigar band.", noCandidates: 'Nothing close in the catalog yet.', noneOfThese: 'None of these',
+    tryAgain: 'Take another photo', limit: "You've reached today's limit of band scans. Try again tomorrow.",
+    knownCode: 'This code belongs to "{{name}}". Which catalog cigar is it?', knownMaker: 'This code is from {{maker}}. Which cigar is it?',
+    whichOne: 'Find it in the catalog to link this code:',
   },
   cigar: {
     community: 'Community', friends: 'People you follow', score100: '100-pt avg', wrapper: 'Wrapper', binder: 'Binder',

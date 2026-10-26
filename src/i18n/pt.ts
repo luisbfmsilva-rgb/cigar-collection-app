@@ -50,6 +50,12 @@ const pt: Strings = {
     title: 'Leia o código de barras da caixa', permission: 'O Long Ash precisa da câmera para ler códigos de barras.',
     allow: 'Permitir câmera', notFound: 'Ainda não há charuto com o código {{code}}.', addWithCode: 'Cadastrar no catálogo',
     scanAgain: 'Ler de novo',
+    bandTitle: 'Fotografe a anilha', modeBarcode: 'Código de barras', modeBand: 'Anilha (IA)', shoot: 'Tirar foto',
+    bandHint: 'Enquadre a anilha. Boa luz, sem reflexo.', aiRead: 'A IA leu', isItOne: 'É um destes?',
+    notBand: 'Isso não parece uma anilha de charuto.', noCandidates: 'Nada parecido no catálogo ainda.', noneOfThese: 'Nenhum destes',
+    tryAgain: 'Tirar outra foto', limit: 'Você atingiu o limite de leituras de anilha de hoje. Tente amanhã.',
+    knownCode: 'Este código é de "{{name}}". Qual charuto do catálogo é?', knownMaker: 'Este código é da {{maker}}. Qual charuto é?',
+    whichOne: 'Procure no catálogo para vincular este código:',
   },
   cigar: {
     community: 'Comunidade', friends: 'Quem você segue', score100: 'Média 100 pts', wrapper: 'Capa', binder: 'Capote',

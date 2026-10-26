@@ -135,8 +135,46 @@ export async function searchCigars(q: string) {
   return must(await supabase.rpc('search_cigars', { q: term, max_results: 40 })) as Cigar[];
 }
 
+export async function cigarsByBarcode(code: string) {
+  return must(await supabase.rpc('find_cigars_by_barcode', { p_code: code })) as Cigar[];
+}
+
 export async function cigarByBarcode(code: string) {
-  return must(await supabase.from('cigar_list').select('*').contains('barcodes', [code]).limit(1).maybeSingle()) as Cigar | null;
+  return (await cigarsByBarcode(code))[0] ?? null;
+}
+
+/** What is known about a code that is not linked to a cigar yet: product name and/or maker. */
+export async function barcodeInfo(code: string) {
+  const rows = must(await supabase.rpc('barcode_info', { p_code: code })) as { name: string | null; maker: string | null; exact: boolean }[];
+  return rows[0] ?? null;
+}
+
+/** The user says "this code is this cigar". Trusted accounts count at once; others need a second user to agree. */
+export async function linkBarcode(code: string, cigarId: string) {
+  const me = await uid();
+  const { error } = await supabase.from('barcode_links').insert({ code, cigar_id: cigarId, user_id: me });
+  if (error && !/duplicate/i.test(error.message)) throw new Error(error.message);
+}
+
+export type BandReading = {
+  is_cigar_band: boolean; brand: string; line: string; vitola?: string; wrapper_shade?: string; text_read: string; confidence: number;
+};
+
+/** Sends a photo (base64) of a cigar band to the AI and gets back what it read plus the closest catalog cigars. */
+export async function identifyBand(image: string, mime = 'image/jpeg') {
+  const { data, error } = await supabase.functions.invoke('identify-band', { body: { image, mime } });
+  if (error) {
+    const body = await (error as { context?: Response }).context?.json?.().catch(() => null);
+    throw new Error(body?.error ?? error.message);
+  }
+  return data as { scan_id: string | null; ai: BandReading; candidates: Cigar[] };
+}
+
+/** Records what the user decided, and keeps the photo so the recognition can be trained. */
+export async function finishBandScan(scanId: string, outcome: 'confirmed' | 'other' | 'none', cigarId: string | null, photoUri?: string) {
+  let photo_path: string | undefined;
+  if (photoUri) photo_path = await uploadImage('band-photos', photoUri).catch(() => undefined);
+  must(await supabase.from('band_scans').update({ outcome, chosen_cigar_id: cigarId, ...(photo_path ? { photo_path } : {}) }).eq('id', scanId));
 }
 
 export async function topCigars(country?: string) {

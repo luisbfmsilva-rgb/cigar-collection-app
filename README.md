@@ -60,6 +60,21 @@ No Supabase, em **Authentication → Sign In / Providers**:
 
 Quem já rodou o `setup_all.sql` antes da versão 1.1 só precisa rodar, no SQL Editor, o arquivo `supabase/migrations/20261022000001_account_types.sql`.
 
+### Reconhecimento de anilha (IA) e códigos de barras — versão 1.2
+
+No SQL Editor, rode nesta ordem: `supabase/migrations/20261022000001_account_types.sql` (se ainda não rodou), `supabase/migrations/20261026000001_recognition.sql` e `supabase/barcode_catalog_utl_ca.sql` (códigos de barras de referência).
+
+A leitura da anilha usa a função `supabase/functions/identify-band`:
+
+```
+supabase login
+supabase link --project-ref <ref do projeto>
+supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
+supabase functions deploy identify-band
+```
+
+Limite padrão: 40 leituras por usuário a cada 24 h (`BAND_DAILY_LIMIT`). Cada foto confirmada pelo usuário fica no bucket privado `band-photos` e em `band_scans`, formando a base de treino.
+
 ### 5. Virar administrador
 
 Depois de criar sua conta no app, rode no SQL Editor:
