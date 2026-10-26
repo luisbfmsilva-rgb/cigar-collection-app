@@ -45,10 +45,10 @@ Deno.serve(async (req) => {
       method: 'POST',
       headers: { 'x-api-key': Deno.env.get('ANTHROPIC_API_KEY')!, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
       body: JSON.stringify({
-        model: MODEL, max_tokens: 600, tools: [TOOL], tool_choice: { type: 'tool', name: 'report_band' },
+        model: MODEL, max_tokens: 600, tools: [TOOL], tool_choice: { type: 'auto' },
         messages: [{ role: 'user', content: [
           { type: 'image', source: { type: 'base64', media_type: mime, data: image } },
-          { type: 'text', text: 'Read this cigar band or box. Report brand, line and size exactly as printed. Do not guess: leave fields empty when not visible, and lower the confidence.' },
+          { type: 'text', text: 'Read this cigar band or box and answer by calling the report_band tool. Report brand, line and size exactly as printed. Do not guess: leave fields empty when not visible, and lower the confidence.' },
         ] }],
       }),
     });
