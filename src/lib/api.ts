@@ -165,7 +165,7 @@ export async function identifyBand(image: string, mime = 'image/jpeg') {
   const { data, error } = await supabase.functions.invoke('identify-band', { body: { image, mime } });
   if (error) {
     const body = await (error as { context?: Response }).context?.json?.().catch(() => null);
-    throw new Error(body?.error ?? error.message);
+    throw new Error(body?.error ? `${body.error}${body.status != null ? ` (${body.status})` : ''}${body.detail ? `: ${body.detail}` : ''}` : error.message);
   }
   return data as { scan_id: string | null; ai: BandReading; candidates: Cigar[] };
 }

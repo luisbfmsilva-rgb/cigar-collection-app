@@ -33,6 +33,7 @@ Deno.serve(async (req) => {
     const { data: u } = await db.auth.getUser();
     if (!u.user) return json({ error: 'NOT_AUTHENTICATED' }, 401);
 
+    if (!Deno.env.get('ANTHROPIC_API_KEY')) return json({ error: 'AI_ERROR', status: 0, detail: 'ANTHROPIC_API_KEY secret is not set' }, 500);
     const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
     const { count } = await db.from('band_scans').select('id', { count: 'exact', head: true }).gte('created_at', since);
     if ((count ?? 0) >= DAILY_LIMIT) return json({ error: 'DAILY_LIMIT' }, 429);
@@ -51,7 +52,11 @@ Deno.serve(async (req) => {
         ] }],
       }),
     });
-    if (!res.ok) return json({ error: 'AI_ERROR', status: res.status }, 502);
+    if (!res.ok) {
+      const detail = (await res.text()).slice(0, 400);
+      console.error('Anthropic API error', res.status, detail);
+      return json({ error: 'AI_ERROR', status: res.status, detail }, 502);
+    }
     const out = await res.json();
     const ai = out.content?.find((c: { type: string }) => c.type === 'tool_use')?.input;
     if (!ai) return json({ error: 'AI_EMPTY' }, 502);
