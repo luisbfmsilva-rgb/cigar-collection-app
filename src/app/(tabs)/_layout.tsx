@@ -39,7 +39,7 @@ export default function TabLayout() {
 function TabBar({ state, descriptors, navigateToTab }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { reset } = useCheckinDraft();
+  const { reset, draft } = useCheckinDraft();
   const { t } = useI18n();
 
   return (
@@ -59,8 +59,12 @@ function TabBar({ state, descriptors, navigateToTab }: BottomTabBarProps) {
               accessibilityRole="button"
               accessibilityLabel={t('tabs.checkin')}
               onPress={() => {
-                reset();
-                router.push('/checkin/pick-cigar');
+                if (draft.cigar) {
+                  router.push('/checkin/new');
+                } else {
+                  reset();
+                  router.push('/checkin/pick-cigar');
+                }
               }}
               style={({ pressed }) => ({
                 width: 64, height: 64, marginTop: -26, borderRadius: 32, backgroundColor: colors.accent,

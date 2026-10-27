@@ -1,12 +1,12 @@
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActionSheetIOS, Alert, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { Button, Card, Chip, ErrorText, Field, Icon, IconName, Pill, RatingInput, Row, Screen, Segmented } from '@/components/ui';
 import { useI18n } from '@/i18n';
 import { createCheckin, humidorItemsForCigar, myClubs } from '@/lib/api';
-import { reviewTotal, useCheckinDraft } from '@/lib/checkinDraft';
+import { minutesBetween, reviewTotal, useCheckinDraft } from '@/lib/checkinDraft';
 import { cigarTitle, scoreToRating } from '@/lib/format';
 import { colors, fonts, radius, space, TOUCH, type } from '@/lib/theme';
 import type { Visibility } from '@/lib/types';
@@ -30,6 +30,21 @@ export default function NewCheckin() {
   }
 
   const total = reviewTotal(draft.scores);
+  const running = draft.startedAt != null && draft.endedAt == null;
+
+  function lightUp() {
+    update({ startedAt: Date.now(), endedAt: null });
+  }
+  function putOut() {
+    const end = Date.now();
+    update({ endedAt: end, duration: minutesBetween(draft.startedAt ?? end, end) });
+  }
+  function discard() {
+    Alert.alert(t('checkin.discardTitle'), t('checkin.discardBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('checkin.discard'), style: 'destructive', onPress: () => { reset(); router.dismissAll(); } },
+    ]);
+  }
 
   function addPhoto() {
     if (draft.photos.length >= 5) return;
@@ -74,11 +89,13 @@ export default function NewCheckin() {
     setBusy(true);
     setError(null);
     try {
+      const end = Date.now();
+      const duration = draft.duration ?? (draft.startedAt ? minutesBetween(draft.startedAt, draft.endedAt ?? end) : null);
       const id = await createCheckin({
         cigarId: draft.cigar!.id, rating: draft.rating ?? scoreToRating(total!), note: draft.note,
         venueId: draft.venue?.id ?? null, eventTitle: draft.eventTitle, atHome: draft.atHome, visibility: draft.visibility,
         music: draft.music, pairings: draft.pairings, photos: draft.photos, scores: total != null ? draft.scores : null,
-        strength: draft.strength, body: draft.body, duration: draft.duration, flavors: draft.flavors,
+        strength: draft.strength, body: draft.body, duration, flavors: draft.flavors,
         clubId: draft.clubId, humidorItemId: draft.humidorItemId,
       });
       reset();
@@ -104,6 +121,9 @@ export default function NewCheckin() {
           </View>
           <Button label={t('common.change')} variant="ghost" small onPress={() => router.push('/checkin/pick-cigar')} />
         </Row>
+
+        <SmokeTimer running={running} startedAt={draft.startedAt} endedAt={draft.endedAt} duration={draft.duration}
+          onStart={lightUp} onStop={putOut} onDuration={(duration) => update({ duration })} />
 
         <View style={{ gap: space.xs }}>
           <Text style={[type.overline, { textAlign: 'center' }]}>{t('checkin.yourRating')}</Text>
@@ -188,8 +208,48 @@ export default function NewCheckin() {
         ) : null}
 
         <ErrorText message={error} />
+        <Button label={t('checkin.discard')} variant="ghost" small onPress={discard} />
       </View>
     </Screen>
+  );
+}
+
+function SmokeTimer({ running, startedAt, endedAt, duration, onStart, onStop, onDuration }: {
+  running: boolean; startedAt: number | null; endedAt: number | null; duration: number | null;
+  onStart: () => void; onStop: () => void; onDuration: (m: number | null) => void;
+}) {
+  const { t } = useI18n();
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    if (!running) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [running]);
+  const secs = startedAt ? Math.max(0, Math.floor(((endedAt ?? now) - startedAt) / 1000)) : 0;
+  const clock = `${Math.floor(secs / 3600) ? `${Math.floor(secs / 3600)}:` : ''}${String(Math.floor((secs % 3600) / 60)).padStart(Math.floor(secs / 3600) ? 2 : 1, '0')}:${String(secs % 60).padStart(2, '0')}`;
+  return (
+    <Card style={{ gap: space.sm }}>
+      <Row style={{ justifyContent: 'space-between' }}>
+        <Row><Icon name="timer-outline" size={20} color={colors.accent} /><Text style={type.label}>{t('checkin.smokeTime')}</Text></Row>
+        {startedAt ? <Text style={[type.title, { fontSize: 24, color: running ? colors.accent : colors.text }]}>{clock}</Text> : null}
+      </Row>
+      {!startedAt ? (
+        <>
+          <Button label={t('checkin.lightUp')} icon="flame-outline" onPress={onStart} />
+          <Text style={type.caption}>{t('checkin.lightUpHint')}</Text>
+        </>
+      ) : running ? (
+        <Button label={t('checkin.putOut')} variant="secondary" onPress={onStop} />
+      ) : null}
+      {startedAt && !running ? (
+        <Field label={t('checkin.minutes')} keyboardType="number-pad" value={duration ? String(duration) : ''}
+          onChangeText={(v) => onDuration(v ? Math.min(600, Number(v.replace(/\D/g, '')) || 0) || null : null)} />
+      ) : null}
+      {!startedAt ? (
+        <Field label={t('checkin.minutes')} keyboardType="number-pad" value={duration ? String(duration) : ''}
+          onChangeText={(v) => onDuration(v ? Math.min(600, Number(v.replace(/\D/g, '')) || 0) || null : null)} />
+      ) : null}
+    </Card>
   );
 }
 

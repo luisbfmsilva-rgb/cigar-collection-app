@@ -83,10 +83,15 @@ const en = {
     saved: 'Check-in saved!', rateFirst: 'Give it a rating first.',
     vis: { public: 'Everyone', followers: 'Followers', private: 'Only me' },
     postToClub: 'Also post to a club', none: 'None',
+    smokeTime: 'Smoking time', lightUp: 'I lit it', lightUpHint: 'Starts the timer. Add notes as you smoke; everything is saved as you go.',
+    putOut: 'Put it out', minutes: 'Minutes (you can edit)', inProgress: 'Check-in in progress', discard: 'Discard check-in',
+    discardTitle: 'Discard this check-in?', discardBody: 'Everything you noted so far will be lost.',
+    openTitle: 'You have a check-in open', openBody: 'Resume it, or discard it and start a new one?', resume: 'Resume', startNew: 'Start new',
   },
   pairing: {
     title: 'Add pairing', kind: 'Type', name: 'What was it?', namePlaceholder: 'e.g. Bourbon, Buffalo Trace',
     kinds: { spirit: 'Spirit', wine: 'Wine', beer: 'Beer', coffee: 'Coffee', non_alcoholic: 'Non-alcoholic', food: 'Food', other: 'Other' },
+    coffee: { drink: 'Drink', method: 'Brewing method', roast: 'Roast', extras: 'How you take it', origin: 'Origin', brand: 'Coffee name or brand (optional)', brandPlaceholder: 'e.g. Fazenda Santa Inês' },
   },
   music: {
     title: 'Add music', searchPlaceholder: 'Song or artist', pasteLink: 'Or paste a Spotify, YouTube or Apple Music link',

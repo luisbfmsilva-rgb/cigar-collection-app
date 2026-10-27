@@ -8,7 +8,7 @@ import { Bar, Button, Card, Chip, Empty, ErrorText, Icon, Loading, Pill, Row, Sc
 import { localized, useI18n } from '@/i18n';
 import { cigarStats, creatorLinksForCigar, feed, getCigar, isBrandManager, setWishlist, wishlistHas } from '@/lib/api';
 import { useMe } from '@/lib/auth';
-import { useCheckinDraft } from '@/lib/checkinDraft';
+import { useStartCheckin } from '@/lib/useStartCheckin';
 import { useFlavors } from '@/lib/flavors';
 import { countryName, formatRating, formatSize } from '@/lib/format';
 import { colors, fonts, space, type } from '@/lib/theme';
@@ -18,7 +18,7 @@ export default function CigarScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, locale, s } = useI18n();
   const router = useRouter();
-  const { reset } = useCheckinDraft();
+  const startCheckin = useStartCheckin();
   const flavors = useFlavors();
   const cigar = useAsync(() => getCigar(id), [id]);
   const stats = useAsync(() => cigarStats(id), [id]);
@@ -61,7 +61,7 @@ export default function CigarScreen() {
       footer={
         <>
           <Button label={t('cigar.addHumidor')} variant="secondary" style={{ flex: 1 }} onPress={() => router.push({ pathname: '/humidor/add', params: { cigarId: id } })} />
-          <Button label={t('cigar.checkin')} style={{ flex: 1.4 }} onPress={() => { reset({ cigar: c }); router.push('/checkin/new'); }} />
+          <Button label={t('cigar.checkin')} style={{ flex: 1.4 }} onPress={() => startCheckin({ cigar: c })} />
         </>
       }
     >

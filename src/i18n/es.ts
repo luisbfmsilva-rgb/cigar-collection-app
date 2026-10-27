@@ -85,10 +85,15 @@ const es: Strings = {
     saved: '¡Check-in guardado!', rateFirst: 'Primero ponle una nota.',
     vis: { public: 'Todos', followers: 'Seguidores', private: 'Solo yo' },
     postToClub: 'Publicar también en un club', none: 'Ninguno',
+    smokeTime: 'Tiempo de fumada', lightUp: 'Lo encendí', lightUpHint: 'Inicia el cronómetro. Anota mientras fumas; todo se guarda solo.',
+    putOut: 'Lo apagué', minutes: 'Minutos (puedes editar)', inProgress: 'Check-in en curso', discard: 'Descartar check-in',
+    discardTitle: '¿Descartar este check-in?', discardBody: 'Se perderá todo lo que anotaste.',
+    openTitle: 'Tienes un check-in abierto', openBody: '¿Retomarlo o descartarlo y empezar otro?', resume: 'Retomar', startNew: 'Empezar nuevo',
   },
   pairing: {
     title: 'Añadir maridaje', kind: 'Tipo', name: '¿Qué fue?', namePlaceholder: 'ej.: Bourbon, Buffalo Trace',
     kinds: { spirit: 'Destilado', wine: 'Vino', beer: 'Cerveza', coffee: 'Café', non_alcoholic: 'Sin alcohol', food: 'Comida', other: 'Otro' },
+    coffee: { drink: 'Bebida', method: 'Método de preparación', roast: 'Tueste', extras: 'Cómo lo tomas', origin: 'Origen', brand: 'Nombre o marca del café (opcional)', brandPlaceholder: 'p. ej. Fazenda Santa Inês' },
   },
   music: {
     title: 'Añadir música', searchPlaceholder: 'Canción o artista', pasteLink: 'O pega un enlace de Spotify, YouTube o Apple Music',

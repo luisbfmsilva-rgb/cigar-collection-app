@@ -1,13 +1,15 @@
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { FlatList, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { ArticleCard } from '@/components/ArticleCard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CheckinCard } from '@/components/CheckinCard';
-import { Empty, ErrorText, IconButton, Loading, Segmented } from '@/components/ui';
+import { Empty, ErrorText, Icon, IconButton, Loading, Segmented } from '@/components/ui';
 import { useI18n } from '@/i18n';
 import { featuredArticles, feed } from '@/lib/api';
-import { colors, space, type } from '@/lib/theme';
+import { useCheckinDraft } from '@/lib/checkinDraft';
+import { cigarTitle } from '@/lib/format';
+import { colors, radius, space, type } from '@/lib/theme';
 import type { CheckinFeedRow } from '@/lib/types';
 import { useAsync } from '@/lib/useAsync';
 
@@ -17,6 +19,7 @@ export default function FeedScreen() {
   const { t } = useI18n();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { draft } = useCheckinDraft();
   const [scope, setScope] = useState<Scope>('following');
   const [more, setMore] = useState<CheckinFeedRow[]>([]);
   const [end, setEnd] = useState(false);
@@ -47,6 +50,17 @@ export default function FeedScreen() {
           <IconButton icon="search-outline" label={t('common.search')} onPress={() => router.push('/people')} filled />
         </View>
       </View>
+      {draft.cigar ? (
+        <Pressable onPress={() => router.push('/checkin/new')} accessibilityRole="button"
+          style={{ marginHorizontal: space.xl, marginTop: space.md, padding: space.md, borderRadius: radius.lg, backgroundColor: colors.accent, flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+          <Icon name={draft.startedAt && !draft.endedAt ? 'flame' : 'create-outline'} size={22} color={colors.onAccent} />
+          <View style={{ flex: 1 }}>
+            <Text style={[type.label, { color: colors.onAccent }]}>{t('checkin.inProgress')}</Text>
+            <Text style={[type.caption, { color: colors.onAccent }]} numberOfLines={1}>{cigarTitle(draft.cigar)}</Text>
+          </View>
+          <Icon name="chevron-forward" size={18} color={colors.onAccent} />
+        </Pressable>
+      ) : null}
       <View style={{ paddingHorizontal: space.xl, paddingVertical: space.md }}>
         <Segmented<Scope>
           value={scope}

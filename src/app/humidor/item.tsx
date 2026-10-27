@@ -4,7 +4,7 @@ import { Alert, Text, View } from 'react-native';
 import { Button, Card, ErrorText, Field, Loading, Screen, Stepper } from '@/components/ui';
 import { useI18n } from '@/i18n';
 import { deleteHumidorItem, updateHumidorItem } from '@/lib/api';
-import { useCheckinDraft } from '@/lib/checkinDraft';
+import { useStartCheckin } from '@/lib/useStartCheckin';
 import { cigarTitle, daysSince, storedFor } from '@/lib/format';
 import { supabase } from '@/lib/supabase';
 import { space, type } from '@/lib/theme';
@@ -15,7 +15,7 @@ export default function HumidorItemScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useI18n();
   const router = useRouter();
-  const { reset } = useCheckinDraft();
+  const startCheckin = useStartCheckin();
   const item = useAsync(async () => {
     const { data, error } = await supabase.from('humidor_items')
       .select('*, cigar:cigars(id, line, vitola, wrapper_shade, brand:brands(name))').eq('id', id).single();
@@ -51,11 +51,10 @@ export default function HumidorItemScreen() {
   }
 
   function smokeOne() {
-    reset({
+    startCheckin({
       cigar: { id: it!.cigar!.id, brand_name: it!.cigar!.brand?.name ?? '', line: it!.cigar!.line, vitola: it!.cigar!.vitola, wrapper_shade: it!.cigar!.wrapper_shade },
       humidorItemId: id,
     });
-    router.replace('/checkin/new');
   }
 
   return (
