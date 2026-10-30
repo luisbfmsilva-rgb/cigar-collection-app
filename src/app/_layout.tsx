@@ -4,10 +4,13 @@ import { Manrope_500Medium } from '@expo-google-fonts/manrope/500Medium';
 import { Manrope_600SemiBold } from '@expo-google-fonts/manrope/600SemiBold';
 import { Manrope_700Bold } from '@expo-google-fonts/manrope/700Bold';
 import { useFonts } from 'expo-font';
-import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, Stack, ThemeProvider, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import * as Notifications from 'expo-notifications';
 import { useEffect } from 'react';
+import { registerForPush } from '@/lib/push';
+import { Logo } from '@/components/Logo';
 import { setupNotifications } from '@/lib/boveda';
 
 setupNotifications();
@@ -68,6 +71,19 @@ function RootNavigator() {
   const { ready, session, profile, needsProfile } = useAuth();
   const { ageConfirmed } = useAge();
   const { setLocale, locale } = useI18n();
+  const router = useRouter();
+
+  // Push notifications: register this device, and open the post when a notification is tapped.
+  useEffect(() => {
+    if (profile?.id) registerForPush(profile.id);
+  }, [profile?.id]);
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener((r) => {
+      const url = (r.notification.request.content.data as { url?: string } | undefined)?.url;
+      if (url) router.push(url as never);
+    });
+    return () => sub.remove();
+  }, [router]);
 
   // Follow the language saved on the profile.
   useEffect(() => {
@@ -121,6 +137,7 @@ function RootNavigator() {
         <Stack.Screen name="cigar/edit" options={{ title: '' }} />
         <Stack.Screen name="brand/[id]" options={{ title: '' }} />
         <Stack.Screen name="brand/article" options={{ title: '' }} />
+        <Stack.Screen name="superpost/new" options={{ title: '', presentation: 'modal' }} />
         <Stack.Screen name="brand/badge-new" options={{ title: '', presentation: 'modal' }} />
         <Stack.Screen name="brand/award" options={{ title: '', presentation: 'modal' }} />
         <Stack.Screen name="article/[id]" options={{ title: '' }} />
@@ -156,7 +173,7 @@ function NotConfigured() {
   const { t } = useI18n();
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', padding: space.xxl, gap: space.md }}>
-      <Text style={type.display}>Long Ash</Text>
+      <Logo size={36} />
       <Text style={[type.body, { textAlign: 'center' }]}>{t('errors.notConfigured')}</Text>
     </View>
   );

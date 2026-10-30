@@ -3,10 +3,13 @@ import { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { ArticleCard } from '@/components/ArticleCard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Logo } from '@/components/Logo';
 import { CheckinCard } from '@/components/CheckinCard';
 import { Empty, ErrorText, Icon, IconButton, Loading, Segmented } from '@/components/ui';
 import { useI18n } from '@/i18n';
-import { featuredArticles, feed } from '@/lib/api';
+import { deleteSuperPost, featuredArticles, feed, feedSuperPosts } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
+import { SuperPostCard } from '@/components/SuperPostCard';
 import { useCheckinDraft } from '@/lib/checkinDraft';
 import { cigarTitle } from '@/lib/format';
 import { colors, radius, space, type } from '@/lib/theme';
@@ -30,6 +33,9 @@ export default function FeedScreen() {
   }, [scope]);
 
   const articles = useAsync(() => featuredArticles(), []);
+  const superPosts = useAsync(() => feedSuperPosts(), []);
+  const { profile } = useAuth();
+  const canSuper = profile?.account_type === 'manufacturer' || profile?.creator_status === 'verified';
 
   const rows = useMemo(() => [...(data ?? []), ...more], [data, more]);
 
@@ -44,8 +50,9 @@ export default function FeedScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: space.xl, paddingTop: space.md }}>
-        <Text style={type.display} accessibilityRole="header">Long Ash</Text>
+        <Logo size={26} />
         <View style={{ flexDirection: 'row', gap: space.sm }}>
+          {canSuper ? <IconButton icon="star-outline" label={t('super.title')} onPress={() => router.push('/superpost/new')} filled /> : null}
           <IconButton icon="people-outline" label={t('clubs.title')} onPress={() => router.push('/clubs')} filled />
           <IconButton icon="search-outline" label={t('common.search')} onPress={() => router.push('/people')} filled />
         </View>
@@ -80,6 +87,17 @@ export default function FeedScreen() {
           ListHeaderComponent={
             <View style={{ gap: space.sm }}>
               <ErrorText message={error} />
+              {(superPosts.data ?? []).length > 0 ? (
+                <>
+                  <Text style={[type.overline, { color: colors.gold }]}>{t('super.title')}</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.md, paddingBottom: space.sm }}>
+                    {superPosts.data!.map((p) => (
+                      <SuperPostCard key={p.id} post={p} mine={p.user_id === profile?.id}
+                        onDelete={() => deleteSuperPost(p.id).then(superPosts.reload).catch(() => {})} />
+                    ))}
+                  </ScrollView>
+                </>
+              ) : null}
               {(articles.data ?? []).length > 0 ? (
                 <>
                   <Text style={[type.overline, { color: colors.gold }]}>{t('brand.featured')}</Text>

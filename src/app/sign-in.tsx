@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Logo } from '@/components/Logo';
 import { Button, ErrorText } from '@/components/ui';
 import { useI18n } from '@/i18n';
 import { appleSignInAvailable, OAuthProvider, signInWithAppleNative, signInWithProvider } from '@/lib/auth';
@@ -42,7 +43,7 @@ export default function SignIn() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, padding: space.xxl, paddingTop: insets.top + space.xxl * 2, paddingBottom: insets.bottom + space.xl, justifyContent: 'space-between' }}>
       <View style={{ gap: space.md }}>
-        <Text style={[type.display, { fontSize: 44 }]} accessibilityRole="header">Long Ash</Text>
+        <Logo size={44} />
         <Text style={[type.body, { fontSize: 17 }]}>{t('ageGate.tagline')}</Text>
       </View>
 

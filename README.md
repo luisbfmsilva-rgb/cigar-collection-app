@@ -60,6 +60,20 @@ No Supabase, em **Authentication → Sign In / Providers**:
 
 Quem já rodou o `setup_all.sql` antes da versão 1.1 só precisa rodar, no SQL Editor, o arquivo `supabase/migrations/20261022000001_account_types.sql`.
 
+### Super Post, notificações e ícone — versão alpha
+
+SQL (nesta ordem): `20261027000001_checkin_live.sql`, `20261030000001_boveda.sql`, `20261030000002_super_posts_push.sql`.
+
+Notificações de posts de quem você segue (push):
+
+```
+supabase secrets set WEBHOOK_SECRET=<texto aleatório longo>
+supabase functions deploy send-push --no-verify-jwt
+```
+
+No painel do Supabase, em *Database → Webhooks*, crie dois webhooks (evento INSERT) apontando para a função `send-push`, com o cabeçalho `x-webhook-secret` igual ao segredo: um na tabela `checkins` e outro em `super_posts`.
+No Android o push exige Firebase (FCM V1) configurado no EAS; sem isso o app funciona normalmente, só não recebe push.
+
 ### Reconhecimento de anilha (IA) e códigos de barras — versão 1.2
 
 No SQL Editor, rode nesta ordem: `supabase/migrations/20261022000001_account_types.sql` (se ainda não rodou), `supabase/migrations/20261026000001_recognition.sql` e `supabase/barcode_catalog_utl_ca.sql` (códigos de barras de referência).

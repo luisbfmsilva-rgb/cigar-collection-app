@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
-import { Alert, Linking, Pressable, Text, View } from 'react-native';
+import { Alert, Linking, Pressable, Switch, Text, View } from 'react-native';
 import { LanguagePicker } from '@/components/LanguagePicker';
 import { PersonRow } from '@/components/PersonRow';
 import { Button, Icon, IconName, Screen, SectionTitle } from '@/components/ui';
@@ -37,6 +37,10 @@ export default function Settings() {
         <SectionTitle title={t('settings.language')} />
         <LanguagePicker onChange={(locale) => updateProfile({ locale }).then(refreshProfile).catch(() => {})} />
 
+        <SectionTitle title={t('notify.title')} />
+        <ToggleRow label={t('notify.friends')} value={me.notify_friends} onChange={(v) => updateProfile({ notify_friends: v }).then(refreshProfile).catch(() => {})} />
+        <ToggleRow label={t('notify.creators')} value={me.notify_creators} onChange={(v) => updateProfile({ notify_creators: v }).then(refreshProfile).catch(() => {})} />
+
         <SectionTitle title={t('account.title')} />
         <Item icon="id-card-outline" label={`${t('account.title')}: ${t(`account.types.${me.account_type}`)}`} onPress={() => router.push('/account')} />
 
@@ -66,6 +70,15 @@ export default function Settings() {
         </Text>
       </View>
     </Screen>
+  );
+}
+
+function ToggleRow({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 52, paddingHorizontal: space.md, borderRadius: 12, backgroundColor: colors.surface }}>
+      <Text style={{ flex: 1, color: colors.text, fontFamily: fonts.semibold, fontSize: 15 }}>{label}</Text>
+      <Switch value={value} onValueChange={onChange} trackColor={{ true: colors.accent, false: colors.chip }} accessibilityLabel={label} />
+    </View>
   );
 }
 

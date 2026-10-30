@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui';
 import { LanguagePicker } from '@/components/LanguagePicker';
 import { useI18n } from '@/i18n';
@@ -17,6 +18,7 @@ export default function AgeGate() {
     <View style={{ flex: 1, backgroundColor: colors.bg, padding: space.xxl, paddingTop: insets.top + space.xxl, paddingBottom: insets.bottom + space.xl, justifyContent: 'space-between' }}>
       <LanguagePicker />
       <View style={{ gap: space.md }}>
+        <Logo size={30} />
         <Text style={[type.display, { fontSize: 48 }]} accessibilityRole="header">{t('ageGate.title')}</Text>
         <Text style={[type.body, { fontSize: 17 }]}>{t('ageGate.tagline')}</Text>
       </View>

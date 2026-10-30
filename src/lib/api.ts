@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import type {
   AccountApplication, AccountType, Brand, BrandArticle, BrandBadge, BrandBadgeAward, BrandFan, CigarPatch, CigarSuggestion,
-  Badge, BovedaPack, CheckinFeedRow, Cigar, Club, ClubRole, CreatorLink, FlavorFamily, FlavorNote, FlavorPick, Humidor,
+  Badge, BovedaPack, SuperPost, CheckinFeedRow, Cigar, Club, ClubRole, CreatorLink, FlavorFamily, FlavorNote, FlavorPick, Humidor,
   HumidorItem, LinkKind, MemberStatus, Music, Pairing, Profile, Reading, Strength, Venue, VenueKind, Visibility,
 } from './types';
 
@@ -57,7 +57,7 @@ export async function usernameAvailable(username: string) {
   return (count ?? 0) === 0;
 }
 
-export async function updateProfile(patch: Partial<Pick<Profile, 'display_name' | 'bio' | 'city' | 'country' | 'locale' | 'avatar_url' | 'creator_headline'>>) {
+export async function updateProfile(patch: Partial<Pick<Profile, 'display_name' | 'bio' | 'city' | 'country' | 'locale' | 'avatar_url' | 'creator_headline' | 'notify_friends' | 'notify_creators'>>) {
   const me = await uid();
   must(await supabase.from('profiles').update(patch).eq('id', me));
 }
@@ -672,7 +672,7 @@ export async function openReports() {
 export async function resolveReport(r: ReportRow, removeContent: boolean) {
   const me = await uid();
   if (removeContent) {
-    const table = { checkin: 'checkins', club_post: 'club_posts', comment: 'comments', creator_link: 'creator_links', brand_article: 'brand_articles' }[r.target_kind];
+    const table = { checkin: 'checkins', club_post: 'club_posts', comment: 'comments', creator_link: 'creator_links', brand_article: 'brand_articles', super_post: 'super_posts' }[r.target_kind];
     if (table) must(await supabase.from(table).delete().eq('id', r.target_id));
   }
   must(await supabase.from('reports').update({ status: removeContent ? 'actioned' : 'dismissed', handled_by: me }).eq('id', r.id));
@@ -853,4 +853,35 @@ export async function pendingSuggestions() {
 
 export async function reviewSuggestion(id: string, approve: boolean) {
   must(await supabase.rpc('review_cigar_suggestion', { sug: id, approve }));
+}
+
+// ---------------------------------------------------------------------------
+// Super posts: one highlighted post a day for verified influencers and manufacturers
+// ---------------------------------------------------------------------------
+
+export async function feedSuperPosts() {
+  return must(await supabase.rpc('feed_super_posts')) as SuperPost[];
+}
+
+export async function canSuperPost() {
+  return must(await supabase.rpc('can_super_post')) as boolean;
+}
+
+/** True when I already used today's super post (the day is New York time, decided by the server). */
+export async function postedSuperToday() {
+  const me = await uid();
+  const day = (d: Date) => d.toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  const posted = await supabase.from('super_posts').select('created_at').eq('user_id', me).order('created_at', { ascending: false }).limit(1).maybeSingle();
+  return !!posted.data && day(new Date(posted.data.created_at)) === day(new Date());
+}
+
+export async function createSuperPost(input: { body: string; photoUri?: string; mime?: string }) {
+  const me = await uid();
+  const photo_path = input.photoUri ? await uploadImage('checkin-photos', input.photoUri, input.mime) : null;
+  const { error } = await supabase.from('super_posts').insert({ user_id: me, body: input.body.trim(), photo_path });
+  if (error) throw new Error(error.code === '23505' ? 'SUPER_POST_LIMIT' : error.message);
+}
+
+export async function deleteSuperPost(id: string) {
+  must(await supabase.from('super_posts').delete().eq('id', id));
 }

@@ -31,6 +31,8 @@ export type Profile = {
   account_type: AccountType;
   creator_status: CreatorStatus;
   creator_headline: string | null;
+  notify_friends: boolean;
+  notify_creators: boolean;
   checkin_count: number;
   unique_cigar_count: number;
   follower_count: number;
@@ -243,4 +245,9 @@ export type CigarSuggestion = {
 
 export type BovedaPack = {
   id: string; humidor_id: string; size_g: 8 | 32 | 60 | 320; rh: number; quantity: number; installed_on: string; replace_after_days: number;
+};
+
+export type SuperPost = {
+  id: string; user_id: string; body: string; photo_path: string | null; cigar_id: string | null; created_at: string;
+  username: string; display_name: string; avatar_url: string | null; account_type: AccountType; creator_status: CreatorStatus;
 };

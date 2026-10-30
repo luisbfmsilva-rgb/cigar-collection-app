@@ -135,6 +135,12 @@ const pt: Strings = {
     source: 'A Boveda recomenda trocar os pacotes a cada 3 meses (cerca de 6 meses no pacote de 320 g). Troque antes se o pacote estiver duro.',
     notifTitle: 'Hora de trocar a Boveda', notifBody: '{{name}}: o pacote de {{size}} g precisa ser trocado.',
   },
+  super: {
+    title: 'Super Post', maker: 'Fabricante', influencer: 'Influenciador', publish: 'Publicar Super Post', body: 'O que você quer compartilhar hoje?',
+    explain: 'Um post em destaque por dia. Todos que seguem você o veem no topo do feed e recebem uma notificação.',
+    addPhoto: 'Adicionar foto', used: 'Você já usou o Super Post de hoje. Volte amanhã.', notAllowed: 'Só influenciadores verificados e fabricantes podem publicar Super Posts.',
+  },
+  notify: { title: 'Notificações', friends: 'Check-ins de quem eu sigo', creators: 'Posts de influenciadores e fabricantes que eu sigo' },
   humidor: {
     capacityHint: 'Quantos charutos cabem. A recomendação de Boveda usa esse número.',
     noHumidor: 'Crie seu primeiro umidor para controlar estoque, tempo de guarda e umidade.', sensorSoon: 'Higrômetros Wi-Fi chegam numa próxima atualização.', wishlistEmpty: 'Toque no coração na página de um charuto para adicioná-lo aqui.', history: 'Leituras recentes', viewCigar: 'Ver página do charuto',

@@ -134,6 +134,12 @@ const es: Strings = {
     source: 'Boveda recomienda cambiar los paquetes cada 3 meses (unos 6 meses en el de 320 g). Cámbialo antes si está duro.',
     notifTitle: 'Hora de cambiar la Boveda', notifBody: '{{name}}: el paquete de {{size}} g debe cambiarse.',
   },
+  super: {
+    title: 'Super Post', maker: 'Fabricante', influencer: 'Influencer', publish: 'Publicar Super Post', body: '¿Qué quieres compartir hoy?',
+    explain: 'Un post destacado por día. Quienes te siguen lo ven arriba en su feed y reciben una notificación.',
+    addPhoto: 'Añadir foto', used: 'Ya usaste el Super Post de hoy. Vuelve mañana.', notAllowed: 'Solo influencers verificados y fabricantes pueden publicar Super Posts.',
+  },
+  notify: { title: 'Notificaciones', friends: 'Check-ins de quien sigo', creators: 'Posts de influencers y fabricantes que sigo' },
   humidor: {
     capacityHint: 'Cuántos puros caben. La recomendación de Boveda usa este número.',
     noHumidor: 'Crea tu primer humidor para controlar stock, añejamiento y humedad.', sensorSoon: 'Los higrómetros Wi-Fi llegarán en una próxima actualización.', wishlistEmpty: 'Toca el corazón en la página de un puro para añadirlo aquí.', history: 'Lecturas recientes', viewCigar: 'Ver página del puro',

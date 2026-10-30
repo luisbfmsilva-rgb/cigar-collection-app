@@ -132,6 +132,12 @@ const en = {
     source: "Boveda recommends replacing packs about every 3 months (about 6 months for the 320 g pack). Replace sooner if a pack feels hard.",
     notifTitle: 'Time to replace your Boveda', notifBody: '{{name}}: the {{size}} g pack is due for replacement.',
   },
+  super: {
+    title: 'Super Post', maker: 'Maker', influencer: 'Influencer', publish: 'Publish Super Post', body: 'What do you want to share today?',
+    explain: 'One highlighted post per day. Everyone who follows you sees it at the top of their feed and gets a notification.',
+    addPhoto: 'Add a photo', used: "You've already used today's Super Post. Come back tomorrow.", notAllowed: 'Only verified influencers and manufacturers can publish Super Posts.',
+  },
+  notify: { title: 'Notifications', friends: 'Check-ins from people I follow', creators: 'Posts from influencers and manufacturers I follow' },
   humidor: {
     capacityHint: 'How many cigars it holds. The Boveda recommendation is based on this.',
     noHumidor: 'Create your first humidor to track stock, aging and humidity.', sensorSoon: 'Wi-Fi hygrometers are coming in a future update.', wishlistEmpty: 'Tap the heart on a cigar page to add it here.', history: 'Recent readings', viewCigar: 'View cigar page',
