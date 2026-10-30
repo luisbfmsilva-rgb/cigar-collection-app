@@ -46,7 +46,9 @@ const es: Strings = {
     brazil: 'De Brasil', recent: 'Añadidos recientemente', notFound: '¿No lo encuentras?', addCigar: 'Añadir un puro',
     clubs: 'Clubes', people: 'Personas', ratings: '{{count}} valoraciones', noResults: 'No hay puros para "{{q}}".',
   },
+  fan: { title: 'Marcas que me gustan', hint: 'Elige hasta 8 marcas. Aparecen en tu perfil como insignia de fan.', search: 'Buscar marca', badge: 'Fan de {{brand}}' },
   scan: {
+    photoCode: 'Foto del código', fromGallery: 'De la galería', reading: 'Leyendo…',
     title: 'Escanea el código de la caja', permission: 'Long Ash necesita la cámara para leer códigos.', allow: 'Permitir cámara',
     notFound: 'Todavía no hay un puro con el código {{code}}.', addWithCode: 'Añadirlo al catálogo', scanAgain: 'Escanear otra vez',
     barcodeHint: 'Apunta al código de barras. Sostén firme a 15–20 cm, con buena luz.', seen: 'Leído: {{code}}', torch: 'Linterna', typeCode: 'O escribe los números', search: 'Buscar',
@@ -88,6 +90,7 @@ const es: Strings = {
     postToClub: 'Publicar también en un club', none: 'Ninguno',
     smokeTime: 'Tiempo de fumada', lightUp: 'Lo encendí', lightUpHint: 'Inicia el cronómetro. Anota mientras fumas; todo se guarda solo.',
     putOut: 'Lo apagué', minutes: 'Minutos (puedes editar)', inProgress: 'Check-in en curso', discard: 'Descartar check-in',
+    editing: 'Editando check-in',
     discardTitle: '¿Descartar este check-in?', discardBody: 'Se perderá todo lo que anotaste.',
     openTitle: 'Tienes un check-in abierto', openBody: '¿Retomarlo o descartarlo y empezar otro?', resume: 'Retomar', startNew: 'Empezar nuevo',
   },
@@ -141,6 +144,7 @@ const es: Strings = {
   },
   notify: { title: 'Notificaciones', friends: 'Check-ins de quien sigo', creators: 'Posts de influencers y fabricantes que sigo' },
   humidor: {
+    editHumidor: 'Editar o eliminar humidor',
     capacityHint: 'Cuántos puros caben. La recomendación de Boveda usa este número.',
     noHumidor: 'Crea tu primer humidor para controlar stock, añejamiento y humedad.', sensorSoon: 'Los higrómetros Wi-Fi llegarán en una próxima actualización.', wishlistEmpty: 'Toca el corazón en la página de un puro para añadirlo aquí.', history: 'Lecturas recientes', viewCigar: 'Ver página del puro',
     title: 'Mi humidor', newHumidor: 'Nuevo humidor', conditions: 'Condiciones', manual: 'Manual', sensor: 'Higrómetro (pronto)',

@@ -24,12 +24,16 @@ export type CheckinDraft = {
   /** When the cigar was lit / put out (ms since epoch). Duration is filled from these but stays editable. */
   startedAt: number | null;
   endedAt: number | null;
+  /** Set when an already published check-in is being edited. */
+  editingId: string | null;
+  /** Photos already attached to the edited check-in (kept as they are; new ones are added to `photos`). */
+  keptPhotos: number;
 };
 
 const empty = (): CheckinDraft => ({
   cigar: null, rating: null, note: '', photos: [], venue: null, eventTitle: '', atHome: false, pairings: [],
   music: null, visibility: 'public', scores: {}, strength: null, body: null, duration: null, flavors: [],
-  clubId: null, humidorItemId: null, startedAt: null, endedAt: null,
+  clubId: null, humidorItemId: null, startedAt: null, endedAt: null, editingId: null, keptPhotos: 0,
 });
 
 const STORAGE_KEY = 'longash.checkin.draft.v1';

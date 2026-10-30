@@ -1,4 +1,5 @@
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import { CameraView, scanFromURLAsync, useCameraPermissions } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
@@ -84,12 +85,52 @@ export default function Scan() {
     try {
       const pic = await camera.current.takePictureAsync({ quality: 0.5, base64: true, skipProcessing: false });
       if (!pic.base64) throw new Error('NO_IMAGE');
-      const r = await identifyBand(pic.base64);
-      if (r.ai?.barcode && /^\d{8,14}$/.test(r.ai.barcode.replace(/\s/g, ''))) {
-        const found = await cigarsByBarcode(r.ai.barcode.replace(/\s/g, '')).catch(() => []);
-        if (found.length) r.candidates = [...found, ...r.candidates.filter((c) => !found.some((f) => f.id === c.id))];
+      await identify(pic.base64, pic.uri);
+    } catch (e) {
+      const m = errorMessage(e);
+      setError(m.includes('DAILY_LIMIT') ? t('scan.limit') : m);
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  /** Sends a photo to the AI (band or printed barcode digits) and shows the candidates. */
+  async function identify(base64: string, uri: string) {
+    const r = await identifyBand(base64);
+    if (r.ai?.barcode && /^\d{8,14}$/.test(r.ai.barcode.replace(/\s/g, ''))) {
+      const found = await cigarsByBarcode(r.ai.barcode.replace(/\s/g, '')).catch(() => []);
+      if (found.length) r.candidates = [...found, ...r.candidates.filter((c) => !found.some((f) => f.id === c.id))];
+    }
+    setBand({ uri, scanId: r.scan_id, ai: r.ai, candidates: r.candidates });
+  }
+
+  /**
+   * Barcode from a photo: the phone's own camera app (sharp focus, flash) or the gallery, then the code is decoded from the picture.
+   * If no code can be decoded, the photo goes to the AI, which also reads the printed digits and the band.
+   */
+  async function barcodeFromPhoto(source: 'camera' | 'library') {
+    if (working) return;
+    setError(null);
+    try {
+      let res: ImagePicker.ImagePickerResult;
+      if (source === 'camera') {
+        const perm = await ImagePicker.requestCameraPermissionsAsync();
+        if (!perm.granted) return;
+        res = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 0.8, base64: true });
+      } else {
+        res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8, base64: true });
       }
-      setBand({ uri: pic.uri, scanId: r.scan_id, ai: r.ai, candidates: r.candidates });
+      if (res.canceled) return;
+      const asset = res.assets[0];
+      setWorking(true);
+      const hits = await scanFromURLAsync(asset.uri, [...BARCODE_TYPES]).catch(() => []);
+      if (hits.length) {
+        setSeen(hits[0].data);
+        await onCode(hits[0].data);
+        return;
+      }
+      if (!asset.base64) throw new Error('NO_IMAGE');
+      await identify(asset.base64, asset.uri);
     } catch (e) {
       const m = errorMessage(e);
       setError(m.includes('DAILY_LIMIT') ? t('scan.limit') : m);
@@ -147,6 +188,11 @@ export default function Scan() {
             {mode === 'barcode' ? (
               <View style={{ width: '88%', gap: space.sm }}>
                 <Text style={[type.caption, { color: '#fff', textAlign: 'center' }]}>{seen ? t('scan.seen', { code: seen }) : t('scan.barcodeHint')}</Text>
+                <ErrorText message={error} />
+                <View style={{ flexDirection: 'row', gap: space.sm }}>
+                  <Button label={working ? t('scan.reading') : t('scan.photoCode')} icon="camera-outline" small loading={working} onPress={() => barcodeFromPhoto('camera')} style={{ flex: 1 }} />
+                  <Button label={t('scan.fromGallery')} icon="images-outline" variant="secondary" small onPress={() => barcodeFromPhoto('library')} style={{ flex: 1 }} />
+                </View>
                 <View style={{ flexDirection: 'row', gap: space.sm, alignItems: 'center' }}>
                   <Field placeholder={t('scan.typeCode')} value={typed} onChangeText={(v) => setTyped(v.replace(/\D/g, ''))} keyboardType="number-pad" style={{ flex: 1 }} />
                   <Button label={t('scan.search')} small disabled={typed.length < 6} onPress={() => onCode(typed)} />

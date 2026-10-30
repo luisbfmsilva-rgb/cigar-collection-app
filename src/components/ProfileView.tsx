@@ -5,7 +5,7 @@ import { Alert, Linking, Pressable, Text, View } from 'react-native';
 import { CheckinCard } from '@/components/CheckinCard';
 import { Avatar, Button, Card, Chip, Empty, Icon, IconButton, Pill, Row, SectionTitle, Segmented } from '@/components/ui';
 import { localized, useI18n } from '@/i18n';
-import { creatorLinks, deleteCreatorLink, feed, isFollowing, setBlock, setFollow, userBadges, userBrandBadges, userFlavorProfile } from '@/lib/api';
+import { creatorLinks, deleteCreatorLink, fanBrands, feed, isFollowing, setBlock, setFollow, userBadges, userBrandBadges, userFlavorProfile } from '@/lib/api';
 import { useFlavors } from '@/lib/flavors';
 import { countryName } from '@/lib/format';
 import { publicUrl } from '@/lib/supabase';
@@ -28,6 +28,7 @@ export function ProfileView({ profile, isMe, onChanged }: { profile: Profile; is
   const brandBadges = useAsync(() => userBrandBadges(profile.id), [profile.id]);
   const links = useAsync(() => (verified ? creatorLinks(profile.id) : Promise.resolve([])), [profile.id, verified]);
   const flavorProfile = useAsync(() => userFlavorProfile(profile.id), [profile.id]);
+  const fans = useAsync(() => fanBrands(profile.id), [profile.id]);
   const [busy, setBusy] = useState(false);
 
   async function toggleFollow() {
@@ -79,6 +80,18 @@ export function ProfileView({ profile, isMe, onChanged }: { profile: Profile; is
       </Row>
 
       {profile.bio ? <Text style={type.body}>{profile.bio}</Text> : null}
+
+      {(fans.data ?? []).length > 0 ? (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+          {fans.data!.map((b) => (
+            <Pressable key={b.id} onPress={() => router.push(`/brand/${b.id}`)} accessibilityRole="button" accessibilityLabel={t('fan.badge', { brand: b.name })}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: radius.pill ?? 999, borderWidth: 1, borderColor: colors.gold, backgroundColor: colors.surface }}>
+              <Icon name="heart" size={12} color={colors.gold} />
+              <Text style={{ fontFamily: fonts.bold, fontSize: 12, color: colors.gold }}>{t('fan.badge', { brand: b.name })}</Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
 
       <Row gap={0} style={{ justifyContent: 'space-between' }}>
         <Count n={profile.checkin_count} label={t('profile.checkins')} />

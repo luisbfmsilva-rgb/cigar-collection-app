@@ -46,7 +46,9 @@ const pt: Strings = {
     brazil: 'Do Brasil', recent: 'Adicionados recentemente', notFound: 'Não encontrou?', addCigar: 'Cadastrar charuto',
     clubs: 'Clubes', people: 'Pessoas', ratings: '{{count}} avaliações', noResults: 'Nenhum charuto encontrado para "{{q}}".',
   },
+  fan: { title: 'Marcas que eu curto', hint: 'Escolha até 8 marcas. Elas aparecem no seu perfil como badge de fã.', search: 'Buscar marca', badge: 'Fã de {{brand}}' },
   scan: {
+    photoCode: 'Foto do código', fromGallery: 'Da galeria', reading: 'Lendo…',
     title: 'Leia o código de barras da caixa', permission: 'O Long Ash precisa da câmera para ler códigos de barras.',
     allow: 'Permitir câmera', notFound: 'Ainda não há charuto com o código {{code}}.', addWithCode: 'Cadastrar no catálogo',
     scanAgain: 'Ler de novo',
@@ -89,6 +91,7 @@ const pt: Strings = {
     postToClub: 'Postar também num clube', none: 'Nenhum',
     smokeTime: 'Tempo de fumada', lightUp: 'Acendi', lightUpHint: 'Inicia o cronômetro. Anote enquanto fuma; tudo é salvo automaticamente.',
     putOut: 'Apaguei', minutes: 'Minutos (pode editar)', inProgress: 'Check-in em andamento', discard: 'Descartar check-in',
+    editing: 'Editando check-in',
     discardTitle: 'Descartar este check-in?', discardBody: 'Tudo o que você anotou até agora será perdido.',
     openTitle: 'Você tem um check-in aberto', openBody: 'Retomar, ou descartar e começar outro?', resume: 'Retomar', startNew: 'Começar novo',
   },
@@ -142,6 +145,7 @@ const pt: Strings = {
   },
   notify: { title: 'Notificações', friends: 'Check-ins de quem eu sigo', creators: 'Posts de influenciadores e fabricantes que eu sigo' },
   humidor: {
+    editHumidor: 'Editar ou excluir umidor',
     capacityHint: 'Quantos charutos cabem. A recomendação de Boveda usa esse número.',
     noHumidor: 'Crie seu primeiro umidor para controlar estoque, tempo de guarda e umidade.', sensorSoon: 'Higrômetros Wi-Fi chegam numa próxima atualização.', wishlistEmpty: 'Toque no coração na página de um charuto para adicioná-lo aqui.', history: 'Leituras recentes', viewCigar: 'Ver página do charuto',
     title: 'Meu umidor', newHumidor: 'Novo umidor', conditions: 'Condições', manual: 'Manual', sensor: 'Higrômetro (em breve)',

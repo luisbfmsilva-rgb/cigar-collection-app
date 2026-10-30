@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, Share, Text, View } from 'react-native';
 import { Avatar, Card, Chip, Icon, IconName, Pill, Row, Stars } from '@/components/ui';
 import { localized, useI18n } from '@/i18n';
-import { deleteCheckin, setSaved, setToast } from '@/lib/api';
+import { checkinToDraft, deleteCheckin, setSaved, setToast } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { useCheckinDraft } from '@/lib/checkinDraft';
 import { cigarTitle, formatRating, timeAgo } from '@/lib/format';
 import { useFlavors } from '@/lib/flavors';
 import { publicUrl } from '@/lib/supabase';
@@ -20,6 +21,7 @@ const PAIRING_ICON: Record<PairingKind, IconName> = {
 export function CheckinCard({ row, onChanged, compact }: { row: CheckinFeedRow; onChanged?: () => void; compact?: boolean }) {
   const { t, locale } = useI18n();
   const router = useRouter();
+  const { draft, reset } = useCheckinDraft();
   const { profile } = useAuth();
   const flavors = useFlavors();
   const [toasted, setToasted] = useState(row.toasted_by_me);
@@ -60,7 +62,14 @@ export function CheckinCard({ row, onChanged, compact }: { row: CheckinFeedRow; 
 
   function more() {
     const buttons = mine
-      ? [{
+      ? [{ text: t('common.edit'), onPress: () => {
+        const go = () => checkinToDraft(row.id).then((d) => { reset(d); router.push('/checkin/new'); }).catch(() => null);
+        if (draft.cigar && !draft.editingId) {
+          Alert.alert(t('checkin.discardTitle'), t('checkin.discardBody'), [
+            { text: t('common.cancel'), style: 'cancel' }, { text: t('checkin.discard'), style: 'destructive', onPress: go },
+          ]);
+        } else go();
+      } }, {
         text: t('common.delete'), style: 'destructive' as const, onPress: () => Alert.alert(t('checkinDetail.deleteConfirm'), undefined, [
           { text: t('common.cancel'), style: 'cancel' },
           { text: t('common.delete'), style: 'destructive', onPress: async () => { await deleteCheckin(row.id); onChanged?.(); } },

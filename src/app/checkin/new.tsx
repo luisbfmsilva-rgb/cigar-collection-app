@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { ActionSheetIOS, Alert, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { Button, Card, Chip, ErrorText, Field, Icon, IconName, Pill, RatingInput, Row, Screen, Segmented } from '@/components/ui';
 import { useI18n } from '@/i18n';
-import { createCheckin, humidorItemsForCigar, myClubs } from '@/lib/api';
+import { createCheckin, humidorItemsForCigar, myClubs, updateCheckin } from '@/lib/api';
 import { minutesBetween, reviewTotal, useCheckinDraft } from '@/lib/checkinDraft';
 import { cigarTitle, scoreToRating } from '@/lib/format';
 import { colors, fonts, radius, space, TOUCH, type } from '@/lib/theme';
@@ -47,7 +47,7 @@ export default function NewCheckin() {
   }
 
   function addPhoto() {
-    if (draft.photos.length >= 5) return;
+    if (draft.photos.length + draft.keptPhotos >= 5) return;
     const fromCamera = async () => {
       const perm = await ImagePicker.requestCameraPermissionsAsync();
       if (!perm.granted) return;
@@ -91,13 +91,20 @@ export default function NewCheckin() {
     try {
       const end = Date.now();
       const duration = draft.duration ?? (draft.startedAt ? minutesBetween(draft.startedAt, draft.endedAt ?? end) : null);
-      const id = await createCheckin({
+      const input = {
         cigarId: draft.cigar!.id, rating: draft.rating ?? scoreToRating(total!), note: draft.note,
         venueId: draft.venue?.id ?? null, eventTitle: draft.eventTitle, atHome: draft.atHome, visibility: draft.visibility,
         music: draft.music, pairings: draft.pairings, photos: draft.photos, scores: total != null ? draft.scores : null,
         strength: draft.strength, body: draft.body, duration, flavors: draft.flavors,
         clubId: draft.clubId, humidorItemId: draft.humidorItemId,
-      });
+      };
+      let id: string;
+      if (draft.editingId) {
+        id = draft.editingId;
+        await updateCheckin(id, input, draft.keptPhotos);
+      } else {
+        id = await createCheckin(input);
+      }
       reset();
       router.dismissAll();
       router.push(`/checkin/${id}`);
@@ -116,10 +123,11 @@ export default function NewCheckin() {
       <View style={{ gap: space.lg }}>
         <Row>
           <View style={{ flex: 1 }}>
+            {draft.editingId ? <Text style={[type.caption, { color: colors.accent, fontFamily: fonts.bold }]}>{t('checkin.editing')}</Text> : null}
             <Text style={[type.title, { fontSize: 22 }]}>{cigarTitle(draft.cigar)}</Text>
             <Text style={type.caption}>{[draft.cigar.vitola, draft.cigar.wrapper_shade].filter(Boolean).join(' · ')}</Text>
           </View>
-          <Button label={t('common.change')} variant="ghost" small onPress={() => router.push('/checkin/pick-cigar')} />
+          {draft.editingId ? null : <Button label={t('common.change')} variant="ghost" small onPress={() => router.push('/checkin/pick-cigar')} />}
         </Row>
 
         <SmokeTimer running={running} startedAt={draft.startedAt} endedAt={draft.endedAt} duration={draft.duration}

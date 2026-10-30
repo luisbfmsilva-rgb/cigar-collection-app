@@ -209,6 +209,24 @@ export async function brandsLike(q: string) {
   return must(await supabase.from('brands').select('id, name').ilike('name', `%${term}%`).order('name').limit(10)) as { id: string; name: string }[];
 }
 
+export type FanBrand = { id: string; name: string };
+
+export async function fanBrands(userId: string) {
+  const rows = must(await supabase.from('fan_brands').select('brand:brands(id, name)').eq('user_id', userId).order('created_at')) as unknown as { brand: FanBrand }[];
+  return rows.map((r) => r.brand).filter(Boolean);
+}
+
+export async function addFanBrand(brandId: string) {
+  const me = await uid();
+  const res = await supabase.from('fan_brands').insert({ user_id: me, brand_id: brandId });
+  if (res.error && !res.error.message.includes('duplicate')) throw new Error(res.error.message);
+}
+
+export async function removeFanBrand(brandId: string) {
+  const me = await uid();
+  must(await supabase.from('fan_brands').delete().eq('user_id', me).eq('brand_id', brandId));
+}
+
 export async function submitCigar(input: {
   brandName: string; line: string; vitola?: string; length_in?: number | null; ring_gauge?: number | null;
   wrapper?: string; wrapper_shade?: string; binder?: string; filler?: string; country?: string | null;
@@ -339,6 +357,63 @@ export async function createCheckin(d: CheckinDraftInput) {
     }
   }
   return id;
+}
+
+/** Loads a published check-in into the shape of the draft, so it can be edited with the same screens. */
+export async function checkinToDraft(id: string) {
+  const c = must(await supabase.from('checkins').select('*').eq('id', id).single()) as Record<string, any>;
+  const [cigar, pairings, flavors, photos] = await Promise.all([
+    supabase.from('cigar_list').select('id, brand_name, line, vitola, wrapper_shade').eq('id', c.cigar_id).single(),
+    supabase.from('checkin_pairings').select('kind, name').eq('checkin_id', id),
+    supabase.from('checkin_flavors').select('third, note, intensity').eq('checkin_id', id),
+    supabase.from('checkin_photos').select('path').eq('checkin_id', id),
+  ]);
+  const venue = c.venue_id ? must(await supabase.from('venues').select('*').eq('id', c.venue_id).maybeSingle()) as Venue | null : null;
+  const event = c.event_id ? must(await supabase.from('events').select('title').eq('id', c.event_id).maybeSingle()) as { title: string } | null : null;
+  const hasScores = c.score_appearance != null;
+  return {
+    editingId: id,
+    cigar: must(cigar) as never,
+    rating: c.rating as number | null,
+    note: (c.note ?? '') as string,
+    venue, eventTitle: event?.title ?? '', atHome: !!c.at_home, visibility: c.visibility as Visibility,
+    pairings: must(pairings) as Pairing[],
+    flavors: must(flavors) as FlavorPick[],
+    keptPhotos: (must(photos) as unknown[]).length,
+    music: c.music_url ? {
+      source: c.music_source, title: c.music_title, artist: c.music_artist, artworkUrl: c.music_artwork_url,
+      previewUrl: c.music_preview_url, url: c.music_url,
+    } as Music : null,
+    scores: hasScores ? {
+      appearance: c.score_appearance, draw: c.score_draw, burn: c.score_burn, flavor: c.score_flavor, aroma: c.score_aroma, overall: c.score_overall,
+    } : {},
+    strength: c.strength as number | null, body: c.body as number | null, duration: c.duration_min as number | null,
+    photos: [] as { uri: string; mime?: string }[], clubId: null, humidorItemId: null, startedAt: null, endedAt: null,
+  };
+}
+
+export async function updateCheckin(id: string, d: CheckinDraftInput, keptPhotos: number) {
+  const eventId = d.eventTitle.trim() ? await findOrCreateEvent(d.eventTitle, d.venueId) : null;
+  const s = d.scores;
+  const full = s && ['appearance', 'draw', 'burn', 'flavor', 'aroma', 'overall'].every((k) => typeof s[k as keyof typeof s] === 'number');
+  must(await supabase.from('checkins').update({
+    rating: d.rating, note: d.note.trim() || null,
+    venue_id: d.atHome ? null : d.venueId, event_id: eventId, at_home: d.atHome, visibility: d.visibility,
+    music_source: d.music?.source ?? null, music_title: d.music?.title ?? null, music_artist: d.music?.artist ?? null,
+    music_artwork_url: d.music?.artworkUrl ?? null, music_preview_url: d.music?.previewUrl ?? null, music_url: d.music?.url ?? null,
+    score_appearance: full ? s!.appearance : null, score_draw: full ? s!.draw : null, score_burn: full ? s!.burn : null,
+    score_flavor: full ? s!.flavor : null, score_aroma: full ? s!.aroma : null, score_overall: full ? s!.overall : null,
+    strength: d.strength, body: d.body, duration_min: d.duration,
+  }).eq('id', id));
+  must(await supabase.from('checkin_pairings').delete().eq('checkin_id', id));
+  if (d.pairings.length) must(await supabase.from('checkin_pairings').insert(d.pairings.map((p) => ({ checkin_id: id, kind: p.kind, name: p.name }))));
+  must(await supabase.from('checkin_flavors').delete().eq('checkin_id', id));
+  if (d.flavors.length) must(await supabase.from('checkin_flavors').insert(d.flavors.map((f) => ({ checkin_id: id, ...f }))));
+  for (let i = 0; i < Math.min(5 - keptPhotos, d.photos.length); i++) {
+    const p = d.photos[i];
+    const path = await uploadImage('checkin-photos', p.uri, p.mime);
+    must(await supabase.from('checkin_photos').insert({ checkin_id: id, path, position: keptPhotos + i }));
+  }
 }
 
 export type FeedScope = { kind: 'following' } | { kind: 'global' } | { kind: 'user'; userId: string } | { kind: 'cigar'; cigarId: string } | { kind: 'saved' };

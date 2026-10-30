@@ -44,7 +44,9 @@ const en = {
     brazil: 'From Brazil', recent: 'Recently added', notFound: "Can't find it?", addCigar: 'Add a cigar',
     clubs: 'Clubs', people: 'People', ratings: '{{count}} ratings', noResults: 'No cigars found for "{{q}}".',
   },
+  fan: { title: 'Brands I like', hint: 'Pick up to 8 brands. They show on your profile as fan badges.', search: 'Search brand', badge: '{{brand}} fan' },
   scan: {
+    photoCode: 'Photo of the code', fromGallery: 'From gallery', reading: 'Reading…',
     title: 'Scan the box barcode', permission: 'Long Ash needs the camera to read barcodes.', allow: 'Allow camera',
     notFound: 'No cigar with barcode {{code}} yet.', addWithCode: 'Add it to the catalog', scanAgain: 'Scan again',
     barcodeHint: 'Point at the barcode. Hold steady 15–20 cm away, with good light.', seen: 'Seen: {{code}}', torch: 'Flashlight', typeCode: 'Or type the digits', search: 'Search',
@@ -86,6 +88,7 @@ const en = {
     postToClub: 'Also post to a club', none: 'None',
     smokeTime: 'Smoking time', lightUp: 'I lit it', lightUpHint: 'Starts the timer. Add notes as you smoke; everything is saved as you go.',
     putOut: 'Put it out', minutes: 'Minutes (you can edit)', inProgress: 'Check-in in progress', discard: 'Discard check-in',
+    editing: 'Editing check-in',
     discardTitle: 'Discard this check-in?', discardBody: 'Everything you noted so far will be lost.',
     openTitle: 'You have a check-in open', openBody: 'Resume it, or discard it and start a new one?', resume: 'Resume', startNew: 'Start new',
   },
@@ -139,6 +142,7 @@ const en = {
   },
   notify: { title: 'Notifications', friends: 'Check-ins from people I follow', creators: 'Posts from influencers and manufacturers I follow' },
   humidor: {
+    editHumidor: 'Edit or delete humidor',
     capacityHint: 'How many cigars it holds. The Boveda recommendation is based on this.',
     noHumidor: 'Create your first humidor to track stock, aging and humidity.', sensorSoon: 'Wi-Fi hygrometers are coming in a future update.', wishlistEmpty: 'Tap the heart on a cigar page to add it here.', history: 'Recent readings', viewCigar: 'View cigar page',
     title: 'My humidor', newHumidor: 'New humidor', conditions: 'Conditions', manual: 'Manual', sensor: 'Hygrometer (soon)',

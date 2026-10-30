@@ -30,7 +30,10 @@ export default function HumidorTab() {
     <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
       <Row style={{ paddingHorizontal: space.xl, paddingTop: space.md, justifyContent: 'space-between' }}>
         <Text style={type.display} accessibilityRole="header">{t('humidor.title')}</Text>
-        <IconButton icon="barcode-outline" label={t('explore.scan')} filled onPress={() => router.push({ pathname: '/scan', params: { then: 'humidor', humidorId: selected ?? '' } })} />
+        <Row gap={space.sm}>
+          {current ? <IconButton icon="create-outline" label={t('humidor.editHumidor')} filled onPress={() => router.push({ pathname: '/humidor/new', params: { id: current.id } })} /> : null}
+          <IconButton icon="barcode-outline" label={t('explore.scan')} filled onPress={() => router.push({ pathname: '/scan', params: { then: 'humidor', humidorId: selected ?? '' } })} />
+        </Row>
       </Row>
 
       {humidors.loading && !humidors.data ? <Loading /> : (humidors.data ?? []).length === 0 ? (
