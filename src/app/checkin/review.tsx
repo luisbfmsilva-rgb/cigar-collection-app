@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { FlavorWheel } from '@/components/FlavorWheel';
-import { Bar, Button, Card, Chip, Field, IconButton, Row, Screen, SectionTitle, Segmented } from '@/components/ui';
+import { Bar, Button, Card, Chip, Field, Icon, IconButton, Row, Screen, SectionTitle, Segmented } from '@/components/ui';
 import { localized, useI18n } from '@/i18n';
 import { reviewTotal, SCORE_MAX, useCheckinDraft } from '@/lib/checkinDraft';
 import { useFlavors } from '@/lib/flavors';
@@ -24,12 +24,14 @@ export default function FullReview() {
   const activeFamilies = new Set(picksHere.map((p) => ref?.byCode.get(p.note)?.family).filter(Boolean) as string[]);
   const total = reviewTotal(draft.scores);
 
-  function cycleNote(code: string) {
+  /** Tap a note to add it (medium) or remove it; the strength is then chosen explicitly in the list below. */
+  function toggleNote(code: string) {
     const existing = draft.flavors.find((f) => f.third === third && f.note === code);
-    let next = draft.flavors.filter((f) => !(f.third === third && f.note === code));
-    if (!existing) next = [...next, { third, note: code, intensity: 2 }];
-    else if (existing.intensity < 3) next = [...next, { ...existing, intensity: existing.intensity + 1 }];
-    update({ flavors: next });
+    update({ flavors: existing ? draft.flavors.filter((f) => f !== existing) : [...draft.flavors, { third, note: code, intensity: 2 }] });
+  }
+
+  function setIntensity(code: string, intensity: number) {
+    update({ flavors: draft.flavors.map((f) => (f.third === third && f.note === code ? { ...f, intensity } : f)) });
   }
 
   function setScore(k: (typeof CRITERIA)[number], v: number) {
@@ -70,12 +72,35 @@ export default function FullReview() {
                 const pick = picksHere.find((p) => p.note === n.code);
                 return (
                   <Chip key={n.code} selected={!!pick} color={ref?.familyByCode.get(n.family)?.color}
-                    label={`${localized(n, locale)}${pick ? ` ${'•'.repeat(pick.intensity)}` : ''}`} onPress={() => cycleNote(n.code)} />
+                    label={localized(n, locale)} onPress={() => toggleNote(n.code)} />
                 );
               })}
             </View>
           </Card>
         ) : <Text style={type.caption}>{t('review.tapFamily')}</Text>}
+
+        {picksHere.length > 0 ? (
+          <Card style={{ gap: space.md }}>
+            <Text style={type.label}>{t('review.picked')}</Text>
+            {picksHere.map((p) => {
+              const n = ref?.byCode.get(p.note);
+              return (
+                <View key={p.note} style={{ gap: 6 }}>
+                  <Row style={{ justifyContent: 'space-between' }}>
+                    <Text style={[type.label, { color: n ? ref?.familyByCode.get(n.family)?.color : undefined }]}>{n ? localized(n, locale) : p.note}</Text>
+                    <Pressable onPress={() => toggleNote(p.note)} hitSlop={10} accessibilityRole="button" accessibilityLabel={t('common.remove')}>
+                      <Icon name="close" size={18} color={colors.textMuted} />
+                    </Pressable>
+                  </Row>
+                  <Segmented<string>
+                    value={String(p.intensity)} onChange={(v) => setIntensity(p.note, Number(v))}
+                    options={[{ value: '1', label: `• ${t('review.light')}` }, { value: '2', label: `•• ${t('review.medium')}` }, { value: '3', label: `••• ${t('review.strong')}` }]}
+                  />
+                </View>
+              );
+            })}
+          </Card>
+        ) : null}
 
         <SectionTitle title={t('review.scores')} />
         <View style={{ gap: space.md }}>

@@ -240,3 +240,7 @@ export type CigarSuggestion = {
   id: string; cigar_id: string; author_id: string | null; changes: CigarPatch; note: string | null;
   status: RequestStatus; created_at: string;
 };
+
+export type BovedaPack = {
+  id: string; humidor_id: string; size_g: 8 | 32 | 60 | 320; rh: number; quantity: number; installed_on: string; replace_after_days: number;
+};

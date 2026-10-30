@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import type {
   AccountApplication, AccountType, Brand, BrandArticle, BrandBadge, BrandBadgeAward, BrandFan, CigarPatch, CigarSuggestion,
-  Badge, CheckinFeedRow, Cigar, Club, ClubRole, CreatorLink, FlavorFamily, FlavorNote, FlavorPick, Humidor,
+  Badge, BovedaPack, CheckinFeedRow, Cigar, Club, ClubRole, CreatorLink, FlavorFamily, FlavorNote, FlavorPick, Humidor,
   HumidorItem, LinkKind, MemberStatus, Music, Pairing, Profile, Reading, Strength, Venue, VenueKind, Visibility,
 } from './types';
 
@@ -157,7 +157,7 @@ export async function linkBarcode(code: string, cigarId: string) {
 }
 
 export type BandReading = {
-  is_cigar_band: boolean; brand: string; line: string; vitola?: string; wrapper_shade?: string; text_read: string; confidence: number;
+  is_cigar_band: boolean; brand: string; line: string; vitola?: string; wrapper_shade?: string; text_read: string; confidence: number; barcode?: string;
 };
 
 /** Sends a photo (base64) of a cigar band to the AI and gets back what it read plus the closest catalog cigars. */
@@ -577,6 +577,22 @@ export async function readings(humidorId: string, limit = 30) {
 
 export async function logReading(humidorId: string, rh: number | null, tempC: number | null) {
   must(await supabase.from('humidor_readings').insert({ humidor_id: humidorId, rh, temp_c: tempC, source: 'manual' }));
+}
+
+export async function bovedaPacks(humidorId: string) {
+  return must(await supabase.from('humidor_boveda').select('*').eq('humidor_id', humidorId).order('created_at')) as BovedaPack[];
+}
+
+export async function addBovedaPack(input: Omit<BovedaPack, 'id'>) {
+  must(await supabase.from('humidor_boveda').insert(input));
+}
+
+export async function updateBovedaPack(id: string, patch: Partial<Omit<BovedaPack, 'id' | 'humidor_id'>>) {
+  must(await supabase.from('humidor_boveda').update(patch).eq('id', id));
+}
+
+export async function deleteBovedaPack(id: string) {
+  must(await supabase.from('humidor_boveda').delete().eq('id', id));
 }
 
 /** Humidor items holding a given cigar (for "smoke one from the humidor"). */

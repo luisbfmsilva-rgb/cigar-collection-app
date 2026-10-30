@@ -8,6 +8,9 @@ import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { setupNotifications } from '@/lib/boveda';
+
+setupNotifications();
 import { Text, View } from 'react-native';
 import 'react-native-reanimated';
 import { Loading } from '@/components/ui';
@@ -133,6 +136,7 @@ function RootNavigator() {
         <Stack.Screen name="humidor/add" options={{ title: '' }} />
         <Stack.Screen name="humidor/reading" options={{ title: '', presentation: 'modal' }} />
         <Stack.Screen name="humidor/item" options={{ title: '' }} />
+        <Stack.Screen name="humidor/boveda" options={{ title: '' }} />
         <Stack.Screen name="profile/edit" options={{ title: '' }} />
         <Stack.Screen name="profile/followers" options={{ title: '' }} />
         <Stack.Screen name="creator/apply" options={{ title: '' }} />

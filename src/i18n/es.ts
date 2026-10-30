@@ -49,6 +49,7 @@ const es: Strings = {
   scan: {
     title: 'Escanea el código de la caja', permission: 'Long Ash necesita la cámara para leer códigos.', allow: 'Permitir cámara',
     notFound: 'Todavía no hay un puro con el código {{code}}.', addWithCode: 'Añadirlo al catálogo', scanAgain: 'Escanear otra vez',
+    barcodeHint: 'Apunta al código de barras. Sostén firme a 15–20 cm, con buena luz.', seen: 'Leído: {{code}}', torch: 'Linterna', typeCode: 'O escribe los números', search: 'Buscar',
     bandTitle: 'Fotografía la vitola', modeBarcode: 'Código de barras', modeBand: 'Vitola (IA)', shoot: 'Tomar foto',
     bandHint: 'Encuadra la anilla. Buena luz, sin reflejos.', aiRead: 'La IA leyó', isItOne: '¿Es uno de estos?',
     notBand: 'Eso no parece una anilla de puro.', noCandidates: 'Aún no hay nada parecido en el catálogo.', noneOfThese: 'Ninguno de estos',
@@ -108,7 +109,7 @@ const es: Strings = {
     kinds: { shop: 'Tienda', lounge: 'Salón', bar: 'Bar', restaurant: 'Restaurante', other: 'Otro' },
   },
   review: {
-    families: 'familias', outOf100: 'de 100', intensityHint: 'Toca una nota para marcarla; toca de nuevo para subir la intensidad (•••).',
+    families: 'familias', outOf100: 'de 100', intensityHint: 'Toca las notas que percibes. Luego ajusta la intensidad de cada una abajo.', picked: 'Notas elegidas', light: 'Suave', medium: 'Media', strong: 'Fuerte',
     title: 'Reseña completa', thirds: ['Entero', '1er tercio', '2º tercio', '3er tercio'],
     flavors: 'Rueda de sabores', tapFamily: 'Toca una familia para elegir notas.', intensity: 'Intensidad',
     scores: 'Puntuación (100 pts)', strength: 'Fuerza', body: 'Cuerpo', duration: 'Tiempo de fumada (min)',
@@ -122,7 +123,19 @@ const es: Strings = {
     title: 'Check-in', comments: 'Comentarios', addComment: 'Escribe un comentario…', send: 'Enviar', deleteConfirm: '¿Eliminar este check-in?',
     score: '{{score}} pts', pairings: 'Maridaje', flavors: 'Sabores',
   },
+  boveda: {
+    title: 'Boveda', none: 'No hay paquetes registrados. Toca para añadir.', summary: '{{count}} paquetes registrados',
+    noSize: 'Indica la capacidad del humidor (nº de puros) o añade puros para ver la recomendación.',
+    need: 'Para {{cigars}} puros necesitas unos {{packs}} paquetes de 60 g.', have: 'Instalado: {{packs}} × 60 g equivalentes.',
+    addMore: 'Añade {{count}} más de 60 g', enough: 'Paquetes suficientes', replaceNow: 'Cambiar ya', daysLeft: 'faltan {{days}} días',
+    installed: 'Instalado el {{date}} · cambiar tras {{days}} días', replaceEvery: 'Cambiar cada (días)', suggested: 'Boveda sugiere {{days}} días. Puedes cambiarlo.',
+    replacedToday: 'Lo cambié hoy', addPack: 'Añadir paquetes', size: 'Tamaño', rh: 'Humedad', quantity: 'Cantidad',
+    rule: 'Regla usada: 1 paquete de 60 g por cada {{n}} puros. Otros tamaños se convierten por peso, así que es una estimación.',
+    source: 'Boveda recomienda cambiar los paquetes cada 3 meses (unos 6 meses en el de 320 g). Cámbialo antes si está duro.',
+    notifTitle: 'Hora de cambiar la Boveda', notifBody: '{{name}}: el paquete de {{size}} g debe cambiarse.',
+  },
   humidor: {
+    capacityHint: 'Cuántos puros caben. La recomendación de Boveda usa este número.',
     noHumidor: 'Crea tu primer humidor para controlar stock, añejamiento y humedad.', sensorSoon: 'Los higrómetros Wi-Fi llegarán en una próxima actualización.', wishlistEmpty: 'Toca el corazón en la página de un puro para añadirlo aquí.', history: 'Lecturas recientes', viewCigar: 'Ver página del puro',
     title: 'Mi humidor', newHumidor: 'Nuevo humidor', conditions: 'Condiciones', manual: 'Manual', sensor: 'Higrómetro (pronto)',
     humidity: 'Humedad', temperature: 'Temperatura', cigars: 'Puros', lastReading: 'Última lectura: {{when}}',

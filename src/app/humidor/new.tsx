@@ -71,7 +71,7 @@ export default function HumidorForm() {
             {HUMIDOR_KINDS.map((k) => <Chip key={k} label={s.humidor.kinds[k]} selected={kind === k} onPress={() => setKind(k)} />)}
           </View>
         </View>
-        <Field label={t('humidor.capacity')} value={capacity} onChangeText={(v) => setCapacity(v.replace(/\D/g, ''))} keyboardType="number-pad" />
+        <Field label={t('humidor.capacity')} hint={t('humidor.capacityHint')} value={capacity} onChangeText={(v) => setCapacity(v.replace(/\D/g, ''))} keyboardType="number-pad" />
         <Row gap={space.md} style={{ alignItems: 'flex-start' }}>
           <Field label={t('humidor.targetMin')} value={min} onChangeText={setMin} keyboardType="decimal-pad" style={{ flex: 1 }} />
           <Field label={t('humidor.targetMax')} value={max} onChangeText={setMax} keyboardType="decimal-pad" style={{ flex: 1 }} />

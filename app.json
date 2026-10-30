@@ -12,7 +12,9 @@
       "bundleIdentifier": "app.longash",
       "supportsTablet": false,
       "usesAppleSignIn": true,
-      "config": { "usesNonExemptEncryption": false }
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "app.longash",
@@ -66,7 +68,8 @@
         {
           "locationWhenInUsePermission": "Long Ash uses your location to suggest nearby cigar shops and lounges when you check in."
         }
-      ]
+      ],
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true

@@ -15,6 +15,9 @@ import type { Cigar } from '@/lib/types';
 import { errorMessage } from '@/lib/useAsync';
 import { useSearch } from '@/lib/useSearch';
 
+const BARCODE_TYPES = ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128', 'code39', 'code93', 'itf14', 'codabar', 'datamatrix', 'qr', 'pdf417'] as const;
+const SCAN_SETTINGS = { barcodeTypes: [...BARCODE_TYPES] };
+
 type Then = 'cigar' | 'checkin' | 'humidor' | 'new';
 type Mode = 'barcode' | 'band';
 type Band = { uri: string; scanId: string | null; ai: BandReading | null; candidates: Cigar[] };
@@ -33,6 +36,9 @@ export default function Scan() {
   const [missing, setMissing] = useState<{ code: string; name: string | null; maker: string | null } | null>(null);
   const [band, setBand] = useState<Band | null>(null);
   const [working, setWorking] = useState(false);
+  const [torch, setTorch] = useState(false);
+  const [seen, setSeen] = useState<string | null>(null);
+  const [typed, setTyped] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [q, setQ] = useState('');
   const camera = useRef<CameraView>(null);
@@ -79,6 +85,10 @@ export default function Scan() {
       const pic = await camera.current.takePictureAsync({ quality: 0.5, base64: true, skipProcessing: false });
       if (!pic.base64) throw new Error('NO_IMAGE');
       const r = await identifyBand(pic.base64);
+      if (r.ai?.barcode && /^\d{8,14}$/.test(r.ai.barcode.replace(/\s/g, ''))) {
+        const found = await cigarsByBarcode(r.ai.barcode.replace(/\s/g, '')).catch(() => []);
+        if (found.length) r.candidates = [...found, ...r.candidates.filter((c) => !found.some((f) => f.id === c.id))];
+      }
       setBand({ uri: pic.uri, scanId: r.scan_id, ai: r.ai, candidates: r.candidates });
     } catch (e) {
       const m = errorMessage(e);
@@ -108,8 +118,10 @@ export default function Scan() {
           ref={camera}
           style={{ flex: 1 }}
           facing="back"
-          barcodeScannerSettings={{ barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128', 'code39'] }}
-          onBarcodeScanned={mode === 'barcode' && !missing ? (r) => onCode(r.data) : undefined}
+          barcodeScannerSettings={SCAN_SETTINGS}
+          autofocus="on"
+          enableTorch={torch}
+          onBarcodeScanned={mode === 'barcode' && !missing && !band ? (r) => { setSeen(r.data); onCode(r.data); } : undefined}
         />
       ) : (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: space.xxl, gap: space.lg, backgroundColor: colors.bg }}>
@@ -121,6 +133,7 @@ export default function Scan() {
       <View style={{ position: 'absolute', top: insets.top + space.sm, left: space.md, right: space.md, flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
         <IconButton icon="close" label={t('common.close')} onPress={() => router.back()} filled />
         <Text style={[type.heading, { flex: 1 }]}>{mode === 'band' ? t('scan.bandTitle') : t('scan.title')}</Text>
+        {permission.granted ? <IconButton icon={torch ? 'flash' : 'flash-outline'} label={t('scan.torch')} onPress={() => setTorch(!torch)} filled /> : null}
       </View>
 
       {showCamera ? (
@@ -131,6 +144,15 @@ export default function Scan() {
             <View pointerEvents="none" style={{ position: 'absolute', top: '30%', left: '8%', right: '8%', height: 200, borderWidth: 2, borderColor: colors.accent, borderRadius: radius.lg }} />
           )}
           <View style={{ position: 'absolute', left: 0, right: 0, bottom: insets.bottom + space.lg, alignItems: 'center', gap: space.md }}>
+            {mode === 'barcode' ? (
+              <View style={{ width: '88%', gap: space.sm }}>
+                <Text style={[type.caption, { color: '#fff', textAlign: 'center' }]}>{seen ? t('scan.seen', { code: seen }) : t('scan.barcodeHint')}</Text>
+                <View style={{ flexDirection: 'row', gap: space.sm, alignItems: 'center' }}>
+                  <Field placeholder={t('scan.typeCode')} value={typed} onChangeText={(v) => setTyped(v.replace(/\D/g, ''))} keyboardType="number-pad" style={{ flex: 1 }} />
+                  <Button label={t('scan.search')} small disabled={typed.length < 6} onPress={() => onCode(typed)} />
+                </View>
+              </View>
+            ) : null}
             {mode === 'band' ? (
               <>
                 <Text style={[type.caption, { color: '#fff', textAlign: 'center', paddingHorizontal: space.xl }]}>{t('scan.bandHint')}</Text>

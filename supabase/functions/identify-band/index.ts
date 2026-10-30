@@ -19,6 +19,7 @@ const TOOL = {
       vitola: { type: 'string', description: 'Size or shape name if printed (Robusto, Toro, 6x52...). Empty if not visible.' },
       wrapper_shade: { type: 'string', description: 'Wrapper colour if the leaf is visible: Natural, Maduro, Connecticut, Claro, Oscuro... Empty otherwise.' },
       text_read: { type: 'string', description: 'All legible text on the band, verbatim.' },
+      barcode: { type: 'string', description: 'Digits of a printed barcode number (UPC/EAN) if one is clearly legible. Empty otherwise.' },
       confidence: { type: 'number', description: '0 to 1: how sure you are of brand and line.' },
     },
     required: ['is_cigar_band', 'brand', 'line', 'text_read', 'confidence'],

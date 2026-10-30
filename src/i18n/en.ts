@@ -47,6 +47,7 @@ const en = {
   scan: {
     title: 'Scan the box barcode', permission: 'Long Ash needs the camera to read barcodes.', allow: 'Allow camera',
     notFound: 'No cigar with barcode {{code}} yet.', addWithCode: 'Add it to the catalog', scanAgain: 'Scan again',
+    barcodeHint: 'Point at the barcode. Hold steady 15–20 cm away, with good light.', seen: 'Seen: {{code}}', torch: 'Flashlight', typeCode: 'Or type the digits', search: 'Search',
     bandTitle: 'Photograph the band', modeBarcode: 'Barcode', modeBand: 'Band (AI)', shoot: 'Take photo',
     bandHint: 'Fill the frame with the band. Good light, no glare.', aiRead: 'The AI read', isItOne: 'Is it one of these?',
     notBand: "That doesn't look like a cigar band.", noCandidates: 'Nothing close in the catalog yet.', noneOfThese: 'None of these',
@@ -106,7 +107,7 @@ const en = {
     kinds: { shop: 'Shop', lounge: 'Lounge', bar: 'Bar', restaurant: 'Restaurant', other: 'Other' },
   },
   review: {
-    families: 'families', outOf100: 'out of 100', intensityHint: 'Tap a note to add it; tap again to raise the intensity (•••).',
+    families: 'families', outOf100: 'out of 100', intensityHint: 'Tap notes you taste. Then set how strong each one is below.', picked: 'Notes you picked', light: 'Light', medium: 'Medium', strong: 'Strong',
     title: 'Full review', thirds: ['Whole', '1st third', '2nd third', '3rd third'],
     flavors: 'Flavor wheel', tapFamily: 'Tap a family to pick notes.', intensity: 'Intensity',
     scores: 'Score (100 pts)', strength: 'Strength', body: 'Body', duration: 'Smoking time (min)',
@@ -120,7 +121,19 @@ const en = {
     title: 'Check-in', comments: 'Comments', addComment: 'Add a comment…', send: 'Send', deleteConfirm: 'Delete this check-in?',
     score: '{{score}} pts', pairings: 'Pairings', flavors: 'Flavors',
   },
+  boveda: {
+    title: 'Boveda', none: 'No packs registered. Tap to add.', summary: '{{count}} packs registered',
+    noSize: 'Set the humidor capacity (number of cigars) or add cigars to get a recommendation.',
+    need: 'For {{cigars}} cigars you need about {{packs}} × 60 g packs.', have: 'Installed: {{packs}} × 60 g equivalent.',
+    addMore: 'Add {{count}} more 60 g', enough: 'Enough packs', replaceNow: 'Replace now', daysLeft: '{{days}} days left',
+    installed: 'Installed {{date}} · replace after {{days}} days', replaceEvery: 'Replace every (days)', suggested: 'Boveda suggests {{days}} days. You can change it.',
+    replacedToday: 'Replaced today', addPack: 'Add packs', size: 'Size', rh: 'Humidity', quantity: 'Quantity',
+    rule: 'Rule used: 1 × 60 g pack for every {{n}} cigars. Other sizes are converted by weight, so treat it as an estimate.',
+    source: "Boveda recommends replacing packs about every 3 months (about 6 months for the 320 g pack). Replace sooner if a pack feels hard.",
+    notifTitle: 'Time to replace your Boveda', notifBody: '{{name}}: the {{size}} g pack is due for replacement.',
+  },
   humidor: {
+    capacityHint: 'How many cigars it holds. The Boveda recommendation is based on this.',
     noHumidor: 'Create your first humidor to track stock, aging and humidity.', sensorSoon: 'Wi-Fi hygrometers are coming in a future update.', wishlistEmpty: 'Tap the heart on a cigar page to add it here.', history: 'Recent readings', viewCigar: 'View cigar page',
     title: 'My humidor', newHumidor: 'New humidor', conditions: 'Conditions', manual: 'Manual', sensor: 'Hygrometer (soon)',
     humidity: 'Humidity', temperature: 'Temperature', cigars: 'Cigars', lastReading: 'Last reading: {{when}}',

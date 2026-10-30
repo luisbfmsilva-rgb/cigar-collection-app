@@ -5,11 +5,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CigarRow } from '@/components/CigarRow';
 import { Button, Card, Chip, Empty, IconButton, Loading, Pill, Row, Screen, Segmented } from '@/components/ui';
 import { useI18n } from '@/i18n';
-import { humidorItems, myHumidors, myWishlist, readings } from '@/lib/api';
+import { bovedaPacks, humidorItems, myHumidors, myWishlist, readings } from '@/lib/api';
+import { coverage, daysLeft, scheduleBovedaReminders } from '@/lib/boveda';
 import { cigarTitle, daysSince, storedFor, timeAgo } from '@/lib/format';
 import { colors, fonts, radius, space, type } from '@/lib/theme';
 import type { Humidor, HumidorItem } from '@/lib/types';
 import { useAsync } from '@/lib/useAsync';
+import { useEffect } from 'react';
 
 type Tab = 'stock' | 'wishlist';
 
@@ -57,9 +59,16 @@ function HumidorBody({ humidor, tab, setTab, onReload }: { humidor: Humidor; tab
   const router = useRouter();
   const items = useAsync(() => humidorItems(humidor.id), [humidor.id]);
   const last = useAsync(() => readings(humidor.id, 1), [humidor.id]);
+  const packs = useAsync(() => bovedaPacks(humidor.id), [humidor.id]);
   const wishlist = useAsync(() => (tab === 'wishlist' ? myWishlist() : Promise.resolve([])), [tab]);
   const reading = last.data?.[0];
   const total = (items.data ?? []).reduce((n, i) => n + i.quantity, 0);
+  const cigarsForBoveda = Math.max(humidor.capacity ?? 0, total);
+  const cov = coverage(packs.data ?? [], cigarsForBoveda);
+  const due = (packs.data ?? []).filter((p) => daysLeft(p) <= 0).length;
+  useEffect(() => {
+    if (packs.data) scheduleBovedaReminders(packs.data, t('boveda.notifTitle'), (p) => t('boveda.notifBody', { name: humidor.name, size: p.size_g }));
+  }, [packs.data, humidor.name, t]);
   const outOfRange = reading?.rh != null && (reading.rh < humidor.target_rh_min || reading.rh > humidor.target_rh_max);
 
   return (
@@ -84,6 +93,18 @@ function HumidorBody({ humidor, tab, setTab, onReload }: { humidor: Humidor; tab
           </Row>
           <Text style={[type.caption, { fontSize: 11 }]}>{t('humidor.sensorSoon')}</Text>
         </Card>
+
+        <Pressable onPress={() => router.push({ pathname: '/humidor/boveda', params: { id: humidor.id } })} accessibilityRole="button">
+          <Card style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={type.heading}>Boveda</Text>
+              <Text style={type.caption}>
+                {(packs.data ?? []).length === 0 ? t('boveda.none') : t('boveda.summary', { count: (packs.data ?? []).reduce((n, p) => n + p.quantity, 0) })}
+              </Text>
+            </View>
+            {due > 0 ? <Pill label={t('boveda.replaceNow')} tone="warning" /> : cov.missing > 0 && cigarsForBoveda > 0 ? <Pill label={t('boveda.addMore', { count: cov.missing })} tone="warning" /> : null}
+          </Card>
+        </Pressable>
 
         <Segmented<Tab> value={tab} onChange={setTab} options={[{ value: 'stock', label: t('humidor.stock') }, { value: 'wishlist', label: t('humidor.wishlist') }]} />
 
