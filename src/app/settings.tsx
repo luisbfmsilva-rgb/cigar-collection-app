@@ -66,7 +66,7 @@ export default function Settings() {
         <Item icon="trash-outline" label={t('settings.deleteAccount')} onPress={confirmDelete} danger />
 
         <Text style={[type.caption, { textAlign: 'center', marginTop: space.xl }]}>
-          {t('settings.version', { v: Constants.expoConfig?.version ?? '1.0.0' })} · @{me.username}
+          {t('settings.version', { v: Constants.expoConfig?.version ?? '1.0.0' })} · build 2026-10-30e · @{me.username}
         </Text>
       </View>
     </Screen>
